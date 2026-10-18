@@ -73,3 +73,12 @@ export interface ExperienceItem {
   achievements: string[];
   tech: string[];
 }
+
+export interface HackathonItem {
+  event: string;
+  project: string;
+  year: string;
+  summary: string;
+  tech: string[];
+  githubUrl?: string;
+}

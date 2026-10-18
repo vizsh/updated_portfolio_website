@@ -54,7 +54,7 @@ export const Terminal: React.FC = () => {
             { type: 'output', text: '  neuroscope   - Inspect NeuroScope 3D cranial tumor segmentation' },
             { type: 'output', text: '  hotel360     - Inspect Smart Resort 360 decision science' },
             { type: 'output', text: '  ibvap        - Inspect SIH IBVAP border vehicle surveillance' },
-            { type: 'output', text: '  hackathons   - View national hackathon championship titles' },
+            { type: 'output', text: '  hackathons   - List collaborative hackathon builds (2026)' },
             { type: 'output', text: '  projects     - List domain-specific engineering builds' },
             { type: 'output', text: '  skills       - View full technical competencies' },
             { type: 'output', text: '  education    - Display degrees and academic honors' },
@@ -95,8 +95,8 @@ export const Terminal: React.FC = () => {
         case 'drishti':
         case 'kinesis':
           newLines.push(
-            { type: 'success', text: '>>> [DRISHTI AI / KINESIS - 1ST PLACE WINNER] <<<' },
-            { type: 'output', text: '* 79 commits (most iterative project) with modular perception/behaviour/calibration layers.' },
+            { type: 'success', text: '>>> [DRISHTI AI / KINESIS - EXAM MONITORING (2026)] <<<' },
+            { type: 'output', text: '* 79 commits (highest iteration) with modular perception/behaviour/calibration layers.' },
             { type: 'output', text: '* 92% mAP50 on 25k+ ground-truth images, camera-calibrated seat positioning (0 biometric capture).' },
             { type: 'output', text: '* 8 staged demonstration scripts and complete docs/ suite.' },
             { type: 'output', text: '* Repo: https://github.com/vizsh/Drishti_AI' }
@@ -142,29 +142,17 @@ export const Terminal: React.FC = () => {
           );
           break;
 
-        case 'kinesis':
-          newLines.push(
-            { type: 'success', text: '>>> [KINESIS AI - 1ST PLACE DRISHTI AI HACKATHON] <<<' },
-            { type: 'output', text: '* Real-time exam-hall monitoring without facial biometric identification.' },
-            { type: 'output', text: '* Identity mapped through camera-calibrated seat positions.' },
-            { type: 'output', text: '* Fine-tuned on 25,000+ images with 92% mAP50 benchmark.' },
-            { type: 'output', text: '* Statistical rolling baseline engine to eliminate false-positive spikes.' },
-            { type: 'output', text: '* Full-stack FastAPI WebSocket pipeline + React audit dashboard.' }
-          );
-          break;
-
         case 'hackathons':
-        case 'awards':
+        case 'builds':
           newLines.push(
-            { type: 'success', text: '--- NATIONAL COMPETITIVE RECORDS ---' },
-            { type: 'output', text: '  [1ST PLACE] Drishti AI Hackathon (Kinesis AI)' },
-            { type: 'output', text: '  [1ST PLACE] Sathaye College Hackathon (Zenith)' },
-            { type: 'output', text: '  [1ST PLACE] HackOut Hackathon' },
-            { type: 'output', text: '  [1ST PLACE] PCCOE Hacktopia National Hackathon' },
-            { type: 'output', text: '  [1ST PLACE] NMFC TechTatva (X-Ray Fault Classifier)' },
-            { type: 'output', text: '  [3RD PLACE] PCCOE Craftverse (Jarvis Hedge Fund)' },
-            { type: 'output', text: '  [3RD PLACE] MPSTME Commit 1.0' },
-            { type: 'output', text: '  [3 WINS]    Top Finishes in Major Academic / Corporate Case Studies' }
+            { type: 'success', text: '--- COLLABORATIVE HACKATHON BUILDS (2026) ---' },
+            { type: 'output', text: '  * Drishti AI (2026)           - Kinesis AI: CCTV exam monitoring via seat mapping' },
+            { type: 'output', text: '  * PCCOE Craftverse (2026)     - JARVIS: Zero-hallucination deterministic quant hedge fund' },
+            { type: 'output', text: '  * Smart India Hackathon (2026) - SIH IBVAP: Border vehicle & person tracking (MHA/SSB)' },
+            { type: 'output', text: '  * Decentralised Intel (2026)   - NeuroScope 3D: Volumetric cranial tumor segmentation' },
+            { type: 'output', text: '  * Sathaye College (2026)      - Zenith: Full-stack prototype under timed team constraints' },
+            { type: 'output', text: '  * PCCOE Hacktopia (2026)      - Industrial spatial telemetry defect inspection' },
+            { type: 'output', text: '  * NMFC TechTatva (2026)       - Deep learning medical X-ray classification' }
           );
           break;
 

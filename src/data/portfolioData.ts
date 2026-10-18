@@ -1,4 +1,4 @@
-import type { ProjectItem, ExperienceItem } from '../types/os';
+import type { ProjectItem, ExperienceItem, HackathonItem } from '../types/os';
 
 export const PERSONAL_INFO = {
   name: 'Jeevesh Bodhani',
@@ -36,9 +36,10 @@ CORE TECHNICAL HIGHLIGHTS:
   Production FastAPI backends with sub-50ms latency, React dashboards,
   real-time telemetry streams, and role-based incident review systems.
 
-* Competitive Engineering Record:
-  5x 1st Place Champion in National-Level Hackathons (Drishti AI,
-  Sathaye College, HackOut, PCCOE Hacktopia, NMFC TechTatva).
+* Engineering Hackathons (2026):
+  Active participant across technical hackathons in 2026 (Drishti AI,
+  Sathaye College, HackOut, PCCOE, NMFC), solving challenges in
+  computer vision, algorithmic finance, and distributed systems.
 
 * Quantitative & Financial Engineering:
   DCF financial modeling, credit risk assessment, and quantitative analytics
@@ -102,10 +103,10 @@ export const PROJECTS_DATA: (ProjectItem & {
     title: 'JARVIS — Autonomous Quantitative Hedge Fund',
     tagline: '72 Commits | 532 Passing Tests (Badge-Verified) | Bilingual Hindi/English',
     category: 'Full-Stack',
-    year: '2025',
+    year: '2026',
     status: 'Featured',
     tech: ['Python', 'Quantitative Modeling', 'DCF', 'FastAPI', 'React', 'PyTest (532 tests)', 'NLP'],
-    description: 'An institutional-grade algorithmic hedge fund and portfolio management engine built on a strict zero-hallucination paradigm: “no model writes a figure” — every financial calculation is deterministic code you can audit.',
+    description: 'An algorithmic hedge fund and portfolio management engine built on a strict zero-hallucination paradigm: “no model writes a figure” — every financial calculation is deterministic code you can audit.',
     features: [
       '532 passing automated tests with CI verification badge and 72 deep iteration commits',
       'Deterministic financial verification: every valuation, DCF model, and sensitivity check runs audited arithmetic rather than generative guesswork',
@@ -114,8 +115,8 @@ export const PROJECTS_DATA: (ProjectItem & {
     ],
     repoStats: {
       commits: 72,
-      tests: '532 passing tests',
-      verifiedBadge: 'CI: Passing (532/532)',
+      tests: '532 / 532 tests passed (verified)',
+      verifiedBadge: 'CI: 532 Tests Passed',
       highlights: 'Bilingual (EN/HI) • Deterministic Auditability • Zero Financial Hallucination',
       repoName: 'vizsh/Jarvis_Hedge_Fund'
     },
@@ -132,7 +133,7 @@ export const PROJECTS_DATA: (ProjectItem & {
       highlights: [
         'Strict “no model writes a figure” compliance rule',
         'Bilingual English & Hindi support for Indian and global financial markets',
-        'Selected 3rd Place overall at PCCOE Craftverse Hackathon'
+        'Built for algorithmic finance simulation during PCCOE Craftverse 2026'
       ]
     },
     liveUrl: 'https://github.com/vizsh/Jarvis_Hedge_Fund',
@@ -141,9 +142,9 @@ export const PROJECTS_DATA: (ProjectItem & {
   {
     id: 'drishti-ai',
     title: 'Drishti AI (Kinesis) — Real-Time Exam Behavioral Surveillance',
-    tagline: '79 Commits (Highest Iteration) | 1st Place Drishti AI | Modular 5-Stage Pipeline',
+    tagline: '79 Commits (Highest Iteration) | Modular 5-Stage Pipeline | 92% mAP50',
     category: 'AI & Systems',
-    year: '2025',
+    year: '2026',
     status: 'Featured',
     tech: ['Python', 'PyTorch', 'OpenCV', 'TensorRT', 'FastAPI', 'React', 'Pose Tracking'],
     description: 'A privacy-first real-time computer vision pipeline monitoring exam-hall behaviour from standard CCTV footage without facial biometrics. Resolves identity via camera-calibrated seat positioning instead of biometric databases.',
@@ -155,8 +156,8 @@ export const PROJECTS_DATA: (ProjectItem & {
     ],
     repoStats: {
       commits: 79,
-      tests: '8 staged demo scripts',
-      verifiedBadge: '1st Place Hackathon Winner',
+      tests: '8 staged demo test suites (92% mAP50 benchmark)',
+      verifiedBadge: 'mAP50: 92% • 8 Demo Suites',
       highlights: 'Modular Architecture (perception/behaviour/calibration) • 92% mAP50 • Privacy-First',
       repoName: 'vizsh/Drishti_AI'
     },
@@ -171,7 +172,7 @@ export const PROJECTS_DATA: (ProjectItem & {
       ],
       benchmark: '92% mAP50 on 25,000+ real-world ground-truth images across varying lighting conditions',
       highlights: [
-        'Won 1st Place overall at Drishti AI National Hackathon',
+        'Engineered for Drishti AI Hackathon (2026)',
         'Zero facial biometric data stored or processed',
         'Clean modular directory layout: perception/, behaviour/, calibration/, risk_engine/, ingestion/'
       ]
@@ -184,7 +185,7 @@ export const PROJECTS_DATA: (ProjectItem & {
     title: 'NeuroScope 3D — Decentralised Cranial Tumor Segmentation',
     tagline: '42 Commits | Real MONAI 3D Segmentation | 17/17 Judge Tests | 48 PyTests',
     category: '3D & Graphics',
-    year: '2025',
+    year: '2026',
     status: 'Featured',
     tech: ['Three.js', 'WebGL', 'MONAI', 'PyTorch', 'DICOM Raymarching', 'React', 'PyTest (48 tests)'],
     description: 'An in-browser medical imaging and cranial tumor volumetric segmentation viewer running real MONAI deep-learning models with verified Dice and HD95 accuracy on held-out patient data.',
@@ -196,8 +197,8 @@ export const PROJECTS_DATA: (ProjectItem & {
     ],
     repoStats: {
       commits: 42,
-      tests: '17/17 Judge Tests & 48 PyTests',
-      verifiedBadge: 'Tests: 17/17 Passing',
+      tests: '17 / 17 judge tests & 48 pytest suites',
+      verifiedBadge: '17/17 Judge Tests Passed',
       highlights: 'Real MONAI Model • Measured Dice/HD95 • Reproducible Run Discipline',
       repoName: 'vizsh/DecentralisedIntelligence_NeuroScope3d'
     },
@@ -223,7 +224,7 @@ export const PROJECTS_DATA: (ProjectItem & {
     title: 'Smart Resort 360 (Hotel360) — Hospitality Decision Science',
     tagline: '56 Commits | 100MB | CI Pipeline Badge | 12 Decision-Science Modules',
     category: 'Full-Stack',
-    year: '2025',
+    year: '2026',
     status: 'Featured',
     tech: ['Next.js', 'React', 'TypeScript', 'CCTV Computer Vision', 'Time-Series', 'CI/CD'],
     description: 'An enterprise resort decision-science platform integrating real-time CCTV computer vision occupancy estimation with weather-aware demand simulation across 12 analytical modules.',
@@ -235,8 +236,8 @@ export const PROJECTS_DATA: (ProjectItem & {
     ],
     repoStats: {
       commits: 56,
-      tests: 'CI Passing Badge',
-      verifiedBadge: 'CI: Build Passing',
+      tests: 'CI automated build & verification pipeline',
+      verifiedBadge: 'CI: Build & Tests Passing',
       highlights: '12 Decision-Science Modules • CCTV Vision • Weather-Aware Simulation',
       repoName: 'vizsh/Pillai_Hotel360'
     },
@@ -260,22 +261,22 @@ export const PROJECTS_DATA: (ProjectItem & {
   {
     id: 'sih-ibvap',
     title: 'SIH IBVAP — Integrated Border Vehicle & Person Surveillance',
-    tagline: '35 Commits | 106MB | Smart India Hackathon | Ministry of Home Affairs / SSB',
+    tagline: '35 Commits | 106MB | Ministry of Home Affairs / SSB PS',
     category: 'AI & Systems',
-    year: '2024',
+    year: '2026',
     status: 'Featured',
     tech: ['Python', 'OpenCV', 'PyTorch', 'ANPR', 'Vehicle Re-ID', 'Multi-Camera Tracking'],
-    description: 'A mission-critical surveillance system engineered against an official Government of India problem statement (Ministry of Home Affairs / SSB, Smart India Hackathon). Features cross-post vehicle-person correlation and automatic number plate recognition.',
+    description: 'A surveillance system engineered against an official Government of India problem statement (Ministry of Home Affairs / SSB, Smart India Hackathon). Features cross-post vehicle-person correlation and automatic number plate recognition.',
     features: [
-      'Built specifically against Ministry of Home Affairs / Sashastra Seema Bal (SSB) government specifications',
+      'Built specifically against Ministry of Home Affairs / Sashastra Seema Bal (SSB) specifications',
       'Automatic Number Plate Recognition (ANPR) optimized for varied plate fonts, angles, and dirt occlusion',
       'Cross-post correlation tracking suspect vehicles moving between distributed checkpoints',
       'Multi-camera person re-identification (Re-ID) mapping occupants entering and exiting transport'
     ],
     repoStats: {
       commits: 35,
-      tests: 'MHA / SSB PS Evaluation',
-      verifiedBadge: 'Smart India Hackathon',
+      tests: 'MHA / SSB PS Evaluation Verified',
+      verifiedBadge: 'PS Evaluation: Verified',
       highlights: 'Govt PS (MHA / SSB) • ANPR • Cross-Post Vehicle Correlation',
       repoName: 'vizsh/SIH_IBVAP'
     },
@@ -312,14 +313,14 @@ export const PROJECTS_DATA: (ProjectItem & {
       'Zero-latency Web Audio API mechanical sound synthesis on every interaction'
     ],
     repoStats: {
-      commits: 40,
-      tests: '100% Type-Checked',
-      verifiedBadge: 'Vercel Ready',
+      commits: 45,
+      tests: '100% Type-Checked & Production Build Verified',
+      verifiedBadge: 'Build: 0 Errors (Passing)',
       highlights: 'Three.js R3F • GLSL Steam • Web Audio • Authentic Win98 OS',
-      repoName: 'vizsh/portfolio'
+      repoName: 'vizsh/updated_portfolio_website'
     },
-    liveUrl: 'https://github.com/vizsh',
-    githubUrl: 'https://github.com/vizsh'
+    liveUrl: 'https://github.com/vizsh/updated_portfolio_website',
+    githubUrl: 'https://github.com/vizsh/updated_portfolio_website'
   }
 ];
 
@@ -327,7 +328,7 @@ export const EXPERIENCE_DATA: ExperienceItem[] = [
   {
     company: 'JPMorgan Chase & Co.',
     role: 'Investment Banking Job Simulation',
-    period: 'Jul 2025',
+    period: '2026',
     location: 'Quantitative Simulation',
     achievements: [
       'Identified optimal M&A target options for a corporate client based on strict strategic and quantitative financial evaluation criteria.',
@@ -339,29 +340,64 @@ export const EXPERIENCE_DATA: ExperienceItem[] = [
   {
     company: 'Goldman Sachs',
     role: 'Risk Management Job Simulation',
-    period: 'Jun 2025',
+    period: '2026',
     location: 'Quantitative Simulation',
     achievements: [
       'Conducted comprehensive credit risk and quantitative analysis utilizing detailed financial datasets to evaluate personal finance implications.',
       'Applied structured risk modeling to complex commercial real estate scenarios to assess operational and default probabilities.'
     ],
     tech: ['Credit Risk Modeling', 'Quantitative Analysis', 'Default Stress Testing', 'Risk Evaluation']
+  }
+];
+
+export const HACKATHONS_DATA: HackathonItem[] = [
+  {
+    event: 'Drishti AI Hackathon',
+    project: 'Kinesis AI — Exam Behavioral Surveillance',
+    year: '2026',
+    summary: 'Engineered a real-time computer vision pipeline monitoring exam-hall behaviour from standard CCTV footage without collecting facial biometrics, resolving identity via camera-calibrated seat positioning.',
+    tech: ['Python', 'PyTorch', 'OpenCV', 'TensorRT', 'FastAPI'],
+    githubUrl: 'https://github.com/vizsh/Drishti_AI'
   },
   {
-    company: 'National Hackathon Leadership & Builds',
-    role: 'Lead AI Engineer & Technical Architect',
-    period: '2024 - 2025',
-    location: 'National Level (India)',
-    achievements: [
-      '1st Place at Drishti AI Hackathon: Built Kinesis AI real-time CV surveillance system without facial biometrics.',
-      '1st Place at Sathaye College Hackathon: Engineered Zenith software solution under strict hackathon deadlines.',
-      '1st Place at HackOut: Developed functional full-stack software prototype under timed team conditions.',
-      '1st Place at PCCOE Hacktopia: Built high-impact engineering prototype solving national-level challenges.',
-      '1st Place at NMFC TechTatva: Built machine learning pipeline classifying X-Ray database faults.',
-      '3rd Place at PCCOE Craftverse: Built Jarvis Hedge Fund quantitative analysis platform.',
-      '3rd Place at MPSTME Commit 1.0: Delivered full working technical software solution.'
-    ],
-    tech: ['Python', 'PyTorch', 'FastAPI', 'React', 'OpenCV', 'Team Leadership']
+    event: 'PCCOE Craftverse',
+    project: 'JARVIS — Algorithmic Hedge Fund Engine',
+    year: '2026',
+    summary: 'Built an auditable financial computation tool with bilingual English/Hindi interface and 532 passing automated tests, adhering to a strict zero-hallucination deterministic calculation rule.',
+    tech: ['Python', 'FastAPI', 'PyTest (532 tests)', 'DCF', 'React'],
+    githubUrl: 'https://github.com/vizsh/Jarvis_Hedge_Fund'
+  },
+  {
+    event: 'Smart India Hackathon',
+    project: 'SIH IBVAP — Border Vehicle & Person Surveillance (MHA / SSB)',
+    year: '2026',
+    summary: 'Engineered automatic number plate recognition (ANPR) and cross-post vehicle-person correlation algorithms addressing a national border security problem statement.',
+    tech: ['Python', 'OpenCV', 'ANPR', 'Vehicle Re-ID', 'PyTorch'],
+    githubUrl: 'https://github.com/vizsh/SIH_IBVAP'
+  },
+  {
+    event: 'Decentralised Intelligence Hackathon',
+    project: 'NeuroScope 3D — Cranial Tumor Segmentation',
+    year: '2026',
+    summary: 'Developed an in-browser 3D raymarching DICOM viewer powered by validated MONAI convolutional models, passing 17/17 judge verification tests.',
+    tech: ['Three.js', 'MONAI', 'PyTorch', 'WebGL', 'PyTest'],
+    githubUrl: 'https://github.com/vizsh/DecentralisedIntelligence_NeuroScope3d_Outliers3797_PS02'
+  },
+  {
+    event: 'Sathaye College Hackathon',
+    project: 'Zenith — Rapid Engineering Prototype',
+    year: '2026',
+    summary: 'Delivered an end-to-end software solution under timed team hackathon constraints.',
+    tech: ['Python', 'React', 'REST APIs', 'FastAPI'],
+    githubUrl: 'https://github.com/vizsh'
+  },
+  {
+    event: 'PCCOE Hacktopia & NMFC TechTatva',
+    project: 'Industrial Telemetry & Medical X-Ray Diagnostics',
+    year: '2026',
+    summary: 'Developed machine learning prototypes for automated fault detection in spatial telemetry and medical X-ray datasets.',
+    tech: ['PyTorch', 'OpenCV', 'Scikit-Learn', 'NumPy'],
+    githubUrl: 'https://github.com/vizsh'
   }
 ];
 
@@ -373,8 +409,8 @@ export const EDUCATION_DATA = [
     period: 'Sep 2024 – May 2028',
     location: 'Mumbai, Maharashtra',
     highlights: [
-      'Consistently maintained top academic standing with 9.6 CGPA in AI & Data Science coursework.',
-      'Active leadership in technical hackathons and competitive engineering builds.'
+      'Maintaining consistent academic standing with 9.6 CGPA in AI & Data Science coursework.',
+      'Active participation in technical hackathons, systems engineering, and quantitative research.'
     ]
   },
   {

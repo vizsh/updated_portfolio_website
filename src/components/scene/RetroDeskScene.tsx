@@ -321,6 +321,10 @@ const CameraRig: React.FC<{
 
     let lastWheelTime = 0;
     const handleWheel = (e: WheelEvent) => {
+      // CRITICAL FIX: In screen view, wheel scrolling belongs to OS windows and documents.
+      // Do NOT capture wheel events for camera zoom or exit!
+      if (viewMode === 'screen') return;
+
       const now = performance.now();
       if (now - lastWheelTime < 280) return;
       if (Math.abs(e.deltaY) > 20) {
@@ -335,7 +339,7 @@ const CameraRig: React.FC<{
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [onWheelZoom]);
+  }, [viewMode, onWheelZoom]);
 
   useFrame((_, delta) => {
     let targetPos: THREE.Vector3;
@@ -386,11 +390,12 @@ export const RetroDeskScene: React.FC<RetroDeskSceneProps> = ({
   onInteract
 }) => {
   const handleWheelZoom = (deltaY: number) => {
+    // When in screen mode, scrolling belongs strictly to OS windows and documents, never exit!
+    if (viewMode === 'screen') return;
+
     if (deltaY > 0) {
-      // Scrolling down / back -> Zoom Out
-      if (viewMode === 'screen') {
-        onChangeView('desk');
-      } else if (viewMode === 'desk') {
+      // Scrolling down / back -> Zoom Out to Room
+      if (viewMode === 'desk') {
         onChangeView('room');
       }
     } else {

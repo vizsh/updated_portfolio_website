@@ -148,7 +148,45 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 4. Desk Interaction Toast Notification */}
+      {/* 4. Quick Exit / Step Back Button when in Screen Mode */}
+      {viewMode === 'screen' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '8px',
+            right: '12px',
+            zIndex: 9999999
+          }}
+        >
+          <button
+            id="btn-exit-screen"
+            className="win-button"
+            onClick={() => {
+              retroAudio.playMouseDown();
+              setViewMode('desk');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '3px 10px',
+              fontSize: '11px',
+              fontFamily: 'var(--font-retro), sans-serif',
+              fontWeight: 'bold',
+              background: '#c0c0c0',
+              color: '#000080',
+              cursor: 'pointer',
+              boxShadow: '2px 2px 5px rgba(0,0,0,0.5)'
+            }}
+            title="Step back to 3D Desk View (Esc)"
+          >
+            <span style={{ fontSize: '13px' }}>🛋️</span>
+            <span>Step Back to Desk</span>
+          </button>
+        </div>
+      )}
+
+      {/* 5. Desk Interaction Toast Notification */}
       {toastMessage && viewMode !== 'screen' && (
         <div
           style={{
