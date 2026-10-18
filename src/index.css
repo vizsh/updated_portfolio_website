@@ -1,0 +1,308 @@
+/* Windows 98 & CRT Retro Design System Tokens */
+:root {
+  --win-bg: #008080;
+  --win-gray: #c0c0c0;
+  --win-light: #ffffff;
+  --win-dark: #808080;
+  --win-black: #000000;
+  --win-blue-start: #000080;
+  --win-blue-end: #1084d0;
+  --win-gray-start: #808080;
+  --win-gray-end: #b5b5b5;
+  --win-text: #000000;
+  --win-text-light: #ffffff;
+  --win-accent: #fffa00;
+  --taskbar-height: 34px;
+
+  /* Fonts */
+  --font-retro: 'MS Sans Serif', Tahoma, 'Segoe UI', sans-serif;
+  --font-pixel: 'Pixelify Sans', 'Silkscreen', monospace;
+  --font-dos: 'VT323', monospace;
+  --font-mono: 'Courier New', Lucida Console, monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0d0e12;
+  font-family: var(--font-retro);
+  font-size: 13px;
+  color: var(--win-text);
+  image-rendering: pixelated;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Classic 3D Beveled Outset (Buttons, Windows, Taskbar) */
+.win-outset {
+  background-color: var(--win-gray);
+  box-shadow: inset 1px 1px 0px var(--win-light),
+              inset -1px -1px 0px var(--win-black),
+              inset 2px 2px 0px #dfdfdf,
+              inset -2px -2px 0px var(--win-dark);
+}
+
+/* Classic 3D Beveled Inset (Inputs, Status Bars, Sunken panels) */
+.win-inset {
+  background-color: #ffffff;
+  box-shadow: inset 1px 1px 0px var(--win-black),
+              inset -1px -1px 0px var(--win-light),
+              inset 2px 2px 0px var(--win-dark),
+              inset -2px -2px 0px #dfdfdf;
+}
+
+/* Sunken Gray Panel (for status bars & inactive recessed areas) */
+.win-sunken {
+  background-color: var(--win-gray);
+  box-shadow: inset 1px 1px 0px var(--win-dark),
+              inset -1px -1px 0px var(--win-light);
+}
+
+/* Classic 90s Button */
+.win-button {
+  background-color: var(--win-gray);
+  border: none;
+  font-family: var(--font-retro);
+  font-size: 12px;
+  font-weight: bold;
+  padding: 3px 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: inset 1px 1px 0px var(--win-light),
+              inset -1px -1px 0px var(--win-black),
+              inset 2px 2px 0px #dfdfdf,
+              inset -2px -2px 0px var(--win-dark);
+}
+
+.win-button:active, .win-button.active {
+  box-shadow: inset 1px 1px 0px var(--win-black),
+              inset -1px -1px 0px var(--win-light),
+              inset 2px 2px 0px var(--win-dark),
+              inset -2px -2px 0px #dfdfdf;
+  padding: 4px 7px 2px 9px; /* Authentic button press shift */
+}
+
+.win-button:focus {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+}
+
+/* Retro Window Title Bar */
+.win-titlebar {
+  height: 22px;
+  background: linear-gradient(90deg, var(--win-blue-start) 0%, var(--win-blue-end) 100%);
+  color: var(--win-text-light);
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 3px 2px 4px;
+  cursor: grab;
+  letter-spacing: 0.5px;
+}
+
+.win-titlebar.inactive {
+  background: linear-gradient(90deg, var(--win-gray-start) 0%, var(--win-gray-end) 100%);
+  color: #d4d0c8;
+}
+
+.win-titlebar:active {
+  cursor: grabbing;
+}
+
+.win-title-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.win-ctrl-btn {
+  width: 16px;
+  height: 14px;
+  background-color: var(--win-gray);
+  border: none;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 0px var(--win-light),
+              inset -1px -1px 0px var(--win-black),
+              inset 2px 2px 0px #dfdfdf,
+              inset -2px -2px 0px var(--win-dark);
+}
+
+.win-ctrl-btn:active {
+  box-shadow: inset 1px 1px 0px var(--win-black),
+              inset -1px -1px 0px var(--win-light);
+  transform: translate(1px, 1px);
+}
+
+/* Authentic Ghost Drag & Resize Wireframe */
+.win-ghost-wireframe {
+  position: absolute;
+  pointer-events: none;
+  z-index: 999999;
+  border: 2px dashed #000000;
+  outline: 2px dashed #ffffff;
+}
+
+/* CRT Screen Scanline & Phosphor Overlay */
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.18) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.65);
+}
+
+.crt-overlay.crt-off {
+  display: none;
+}
+
+.crt-overlay.crt-subtle {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.08) 50%
+  );
+  background-size: 100% 4px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.35);
+}
+
+.crt-overlay.crt-authentic {
+  /* standard default */
+}
+
+.crt-overlay.crt-heavy {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 40%, 
+    rgba(0, 0, 0, 0.35) 60%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.08),
+    rgba(0, 255, 0, 0.04),
+    rgba(0, 0, 255, 0.08)
+  );
+  background-size: 100% 3px, 4px 100%;
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.85);
+}
+
+/* CRT Turn-On Phosphor Bloom Animation */
+@keyframes crtFadeBg {
+  0% {
+    background-color: #000000;
+  }
+  60% {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes crtBeamExpand {
+  0% {
+    transform: scale(0.01, 0.005);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1, 0.006);
+    opacity: 1;
+  }
+  65% {
+    transform: scale(1, 0.15);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1, 1);
+    opacity: 0;
+  }
+}
+
+/* Retro Scrollbars */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+  background-color: var(--win-gray);
+}
+
+::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 50% / 2px 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--win-gray);
+  box-shadow: inset 1px 1px 0px var(--win-light),
+              inset -1px -1px 0px var(--win-black),
+              inset 2px 2px 0px #dfdfdf,
+              inset -2px -2px 0px var(--win-dark);
+}
+
+::-webkit-scrollbar-thumb:active {
+  box-shadow: inset 1px 1px 0px var(--win-black),
+              inset -1px -1px 0px var(--win-light);
+}
+
+/* CRT Power Off Collapse Animation */
+@keyframes crtTurnOff {
+  0% {
+    transform: scale(1, 1);
+    filter: brightness(1);
+  }
+  60% {
+    transform: scale(1, 0.003);
+    filter: brightness(2);
+  }
+  100% {
+    transform: scale(0, 0);
+    filter: brightness(0);
+  }
+}
+
+.crt-shutting-down {
+  animation: crtTurnOff 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  :root {
+    --taskbar-height: 44px; /* Larger touch targets for mobile thumb navigation */
+  }
+
+  .win-titlebar {
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .win-ctrl-btn {
+    width: 22px;
+    height: 20px;
+    font-size: 12px;
+  }
+}
