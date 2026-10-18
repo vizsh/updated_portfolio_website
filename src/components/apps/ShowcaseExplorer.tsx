@@ -10,10 +10,18 @@ import {
 import { RetroIcon } from '../common/RetroIcon';
 import { retroAudio } from '../../services/audio';
 
-type Tab = 'overview' | 'projects' | 'experience' | 'hackathons' | 'education' | 'skills' | 'contact';
+type Tab = 'overview' | 'video' | 'projects' | 'experience' | 'hackathons' | 'education' | 'skills' | 'contact';
 
-export const ShowcaseExplorer: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+interface ShowcaseExplorerProps {
+  initialTab?: Tab;
+  onOpenApp?: (id: any) => void;
+}
+
+export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
+  initialTab = 'overview',
+  onOpenApp
+}) => {
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [deepDiveProject, setDeepDiveProject] = useState<any | null>(null);
 
@@ -136,6 +144,7 @@ export const ShowcaseExplorer: React.FC = () => {
 
           {[
             { id: 'overview' as Tab, label: 'Overview', icon: 'computer' },
+            { id: 'video' as Tab, label: 'Demo Tour (Video)', icon: 'video' },
             { id: 'projects' as Tab, label: 'Projects (Repos & Tests)', icon: 'folder' },
             { id: 'experience' as Tab, label: 'Experience & Sims (2026)', icon: 'resume' },
             { id: 'hackathons' as Tab, label: 'Hackathons & Builds (2026)', icon: 'terminal' },
@@ -229,8 +238,73 @@ export const ShowcaseExplorer: React.FC = () => {
                 </p>
               </div>
 
+              {/* Featured Project & Portfolio Demonstration Video */}
+              <div
+                className="win-outset"
+                style={{ padding: '12px', background: '#f5f5f5', marginBottom: '16px' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <RetroIcon name="video" size={24} />
+                    <div>
+                      <h3 style={{ fontSize: '13px', margin: 0, color: '#000080' }}>
+                        Portfolio & Projects Demonstration Video
+                      </h3>
+                      <p style={{ margin: 0, fontSize: '11px', color: '#555' }}>
+                        Concise video walkthrough demonstrating real-time computer vision systems, quantitative models, and architectures.
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      className="win-button"
+                      onClick={() => {
+                        retroAudio.playMouseDown();
+                        setActiveTab('video');
+                      }}
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                    >
+                      <span>📺 Full Tour</span>
+                    </button>
+                    {onOpenApp && (
+                      <button
+                        className="win-button"
+                        onClick={() => {
+                          retroAudio.playMouseDown();
+                          onOpenApp('videoDemo');
+                        }}
+                        style={{ fontSize: '11px', padding: '3px 8px', fontWeight: 'bold' }}
+                      >
+                        <span>🎬 ActiveMovie</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  className="win-sunken"
+                  style={{
+                    backgroundColor: '#000000',
+                    borderRadius: '2px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    maxHeight: '340px'
+                  }}
+                >
+                  <video
+                    src="/videos/Jeevesh_Bodhani_Portfolio_Splits.mp4"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    style={{ width: '100%', maxHeight: '340px', display: 'block' }}
+                  />
+                </div>
+              </div>
+
               {/* Quick Navigation Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginBottom: '16px' }}>
                 <div
                   className="win-outset"
                   style={{ padding: '10px', cursor: 'pointer' }}
@@ -243,8 +317,25 @@ export const ShowcaseExplorer: React.FC = () => {
                     <RetroIcon name="folder" size={24} />
                     <strong style={{ fontSize: '13px', color: '#000080' }}>Projects ({PROJECTS_DATA.length})</strong>
                   </div>
-                  <p style={{ fontSize: '11px', color: '#555' }}>
+                  <p style={{ fontSize: '11px', color: '#555', margin: 0 }}>
                     Inspect 6 verified repositories, commit iteration depth, and passing test suites.
+                  </p>
+                </div>
+
+                <div
+                  className="win-outset"
+                  style={{ padding: '10px', cursor: 'pointer' }}
+                  onClick={() => {
+                    retroAudio.playMouseDown();
+                    setActiveTab('video');
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <RetroIcon name="video" size={24} />
+                    <strong style={{ fontSize: '13px', color: '#000080' }}>Demo Tour Video</strong>
+                  </div>
+                  <p style={{ fontSize: '11px', color: '#555', margin: 0 }}>
+                    Full video walkthrough demonstrating live computer vision and financial tools.
                   </p>
                 </div>
 
@@ -258,10 +349,10 @@ export const ShowcaseExplorer: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <RetroIcon name="resume" size={24} />
-                    <strong style={{ fontSize: '13px', color: '#000080' }}>Experience & Sims (2026)</strong>
+                    <strong style={{ fontSize: '13px', color: '#000080' }}>Experience (2026)</strong>
                   </div>
-                  <p style={{ fontSize: '11px', color: '#555' }}>
-                    JPMorgan Chase DCF modeling & Goldman Sachs quantitative risk management simulations.
+                  <p style={{ fontSize: '11px', color: '#555', margin: 0 }}>
+                    JPMorgan Chase DCF modeling & Goldman Sachs quantitative risk simulations.
                   </p>
                 </div>
 
@@ -275,9 +366,9 @@ export const ShowcaseExplorer: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <RetroIcon name="terminal" size={24} />
-                    <strong style={{ fontSize: '13px', color: '#000080' }}>Hackathons & Builds (2026)</strong>
+                    <strong style={{ fontSize: '13px', color: '#000080' }}>Builds (2026)</strong>
                   </div>
-                  <p style={{ fontSize: '11px', color: '#555' }}>
+                  <p style={{ fontSize: '11px', color: '#555', margin: 0 }}>
                     Drishti AI, PCCOE Craftverse, Smart India Hackathon, and medical ML prototypes.
                   </p>
                 </div>
@@ -299,6 +390,147 @@ export const ShowcaseExplorer: React.FC = () => {
                       <p style={{ margin: 0, color: '#555', fontSize: '10.5px', lineHeight: '1.3' }}>{h.summary}</p>
                     </div>
                   ))}
+                </div>
+              </fieldset>
+            </div>
+          )}
+
+          {/* TAB: VIDEO DEMONSTRATION TOUR */}
+          {activeTab === 'video' && (
+            <div>
+              <div style={{ borderBottom: '2px solid #000080', paddingBottom: '6px', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '18px', color: '#000080', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <RetroIcon name="video" size={24} />
+                      <span>Portfolio & Project Demonstration Video (2026)</span>
+                    </h2>
+                    <p style={{ fontSize: '11px', color: '#555', margin: '3px 0 0 0' }}>
+                      Demonstration of computer vision systems, quantitative financial modeling, and 3D web architectures.
+                    </p>
+                  </div>
+                  {onOpenApp && (
+                    <button
+                      className="win-button"
+                      onClick={() => {
+                        retroAudio.playMouseDown();
+                        onOpenApp('videoDemo');
+                      }}
+                      style={{ fontSize: '11px', padding: '3px 10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <span>🎬</span> Open in ActiveMovie Window
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Video Player Display */}
+              <div
+                className="win-outset"
+                style={{ padding: '12px', background: '#f5f5f5', marginBottom: '16px' }}
+              >
+                <div
+                  className="win-sunken"
+                  style={{
+                    backgroundColor: '#000000',
+                    borderRadius: '2px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    maxHeight: '440px'
+                  }}
+                >
+                  <video
+                    src="/videos/Jeevesh_Bodhani_Portfolio_Splits.mp4"
+                    controls
+                    playsInline
+                    style={{ width: '100%', maxHeight: '440px', display: 'block' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '11px', color: '#666' }}>
+                  <span>● Video Source: Jeevesh_Bodhani_Portfolio_Splits.mp4 (61.5 MB)</span>
+                  <span>1080p • Technical Demonstration</span>
+                </div>
+              </div>
+
+              {/* Demonstration Chapter Breakdown */}
+              <fieldset style={{ border: '2px groove #fff', padding: '12px', background: '#fafafa', marginBottom: '16px' }}>
+                <legend style={{ padding: '0 6px', fontWeight: 'bold', color: '#000080', fontSize: '12px' }}>
+                  Projects Highlighted in Demonstration (2026)
+                </legend>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+                  <div className="win-sunken" style={{ padding: '10px', background: '#ffffff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <strong style={{ color: '#000080', fontSize: '12px' }}>Drishti AI / Kinesis AI</strong>
+                      <span className="win-sunken" style={{ padding: '1px 5px', fontSize: '10px', background: '#eef3ff' }}>79 Commits</span>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#444', margin: '0 0 6px 0', lineHeight: '1.4' }}>
+                      Exam-hall surveillance pipeline analyzing behavioral anomalies without biometric facial capture. Mapped via camera-calibrated seat positioning.
+                    </p>
+                    <a
+                      href="https://github.com/vizsh/Drishti_AI"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: '11px', color: '#000080', fontWeight: 'bold', textDecoration: 'none' }}
+                    >
+                      📁 vizsh/Drishti_AI &rarr;
+                    </a>
+                  </div>
+
+                  <div className="win-sunken" style={{ padding: '10px', background: '#ffffff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <strong style={{ color: '#000080', fontSize: '12px' }}>JARVIS Hedge Fund Engine</strong>
+                      <span className="win-sunken" style={{ padding: '1px 5px', fontSize: '10px', background: '#eef3ff' }}>532 Tests</span>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#444', margin: '0 0 6px 0', lineHeight: '1.4' }}>
+                      Deterministic financial auditing system with 532 badge-verified pytests and bilingual English/Hindi interface. Zero LLM hallucinations in figures.
+                    </p>
+                    <a
+                      href="https://github.com/vizsh/Jarvis_Hedge_Fund"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: '11px', color: '#000080', fontWeight: 'bold', textDecoration: 'none' }}
+                    >
+                      📁 vizsh/Jarvis_Hedge_Fund &rarr;
+                    </a>
+                  </div>
+
+                  <div className="win-sunken" style={{ padding: '10px', background: '#ffffff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <strong style={{ color: '#000080', fontSize: '12px' }}>SIH IBVAP (MHA / SSB PS)</strong>
+                      <span className="win-sunken" style={{ padding: '1px 5px', fontSize: '10px', background: '#eef3ff' }}>35 Commits</span>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#444', margin: '0 0 6px 0', lineHeight: '1.4' }}>
+                      Cross-post vehicle correlation and Automatic Number Plate Recognition (ANPR) engineered against official border security problem statements.
+                    </p>
+                    <a
+                      href="https://github.com/vizsh/SIH_IBVAP"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: '11px', color: '#000080', fontWeight: 'bold', textDecoration: 'none' }}
+                    >
+                      📁 vizsh/SIH_IBVAP &rarr;
+                    </a>
+                  </div>
+
+                  <div className="win-sunken" style={{ padding: '10px', background: '#ffffff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <strong style={{ color: '#000080', fontSize: '12px' }}>3D Retro Desktop OS</strong>
+                      <span className="win-sunken" style={{ padding: '1px 5px', fontSize: '10px', background: '#eef3ff' }}>Three.js + R3F</span>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#444', margin: '0 0 6px 0', lineHeight: '1.4' }}>
+                      Three-camera zoom rig, GLSL coffee steam simulation, Web Audio mechanical feedback, and window-managed Windows 98 desktop environment.
+                    </p>
+                    <a
+                      href="https://github.com/vizsh/updated_portfolio_website"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: '11px', color: '#000080', fontWeight: 'bold', textDecoration: 'none' }}
+                    >
+                      📁 vizsh/updated_portfolio_website &rarr;
+                    </a>
+                  </div>
                 </div>
               </fieldset>
             </div>

@@ -13,6 +13,7 @@ import { DisplayProperties, WALLPAPERS, type WallpaperOption } from '../apps/Dis
 import { ResumeViewer } from '../apps/ResumeViewer';
 import { MediaPlayer } from '../apps/MediaPlayer';
 import { RecycleBin } from '../apps/RecycleBin';
+import { VideoPlayer } from '../apps/VideoPlayer';
 import { ShutdownDialog, SafeToTurnOffScreen } from './ShutdownDialog';
 import { retroAudio } from '../../services/audio';
 
@@ -136,6 +137,18 @@ const INITIAL_WINDOWS: Record<AppId, WindowState> = {
     position: { x: 150, y: 50 },
     size: { width: 440, height: 450 },
     minSize: { width: 340, height: 380 }
+  },
+  videoDemo: {
+    id: 'videoDemo',
+    title: 'ActiveMovie - Jeevesh_Bodhani_Portfolio_Splits.mp4',
+    icon: 'video',
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 7,
+    position: { x: 100, y: 40 },
+    size: { width: 640, height: 490 },
+    minSize: { width: 360, height: 320 }
   }
 };
 
@@ -368,7 +381,7 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         onMaximizeToggle={() => toggleMaximize('showcase')}
         onUpdateBounds={(pos, size) => updateWindowBounds('showcase', pos, size)}
       >
-        <ShowcaseExplorer />
+        <ShowcaseExplorer onOpenApp={openApp} />
       </RetroWindow>
 
       {/* 2. Projects Explorer (Folder View) */}
@@ -381,7 +394,7 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         onMaximizeToggle={() => toggleMaximize('projects')}
         onUpdateBounds={(pos, size) => updateWindowBounds('projects', pos, size)}
       >
-        <ShowcaseExplorer />
+        <ShowcaseExplorer initialTab="projects" onOpenApp={openApp} />
       </RetroWindow>
 
       {/* 3. Notepad About Me */}
@@ -492,6 +505,19 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
           onCrtChange={onChangeCrtIntensity}
           onClose={() => closeWindow('displayProperties')}
         />
+      </RetroWindow>
+
+      {/* 11. Video Demonstration Player */}
+      <RetroWindow
+        window={windows.videoDemo}
+        isActive={activeWindowId === 'videoDemo'}
+        onFocus={() => focusWindow('videoDemo')}
+        onClose={() => closeWindow('videoDemo')}
+        onMinimize={() => minimizeWindow('videoDemo')}
+        onMaximizeToggle={() => toggleMaximize('videoDemo')}
+        onUpdateBounds={(pos, size) => updateWindowBounds('videoDemo', pos, size)}
+      >
+        <VideoPlayer />
       </RetroWindow>
 
       {/* Right-Click Desktop Context Menu */}

@@ -173,6 +173,18 @@ export const Taskbar: React.FC<TaskbarProps> = ({
               className="start-menu-item"
               onClick={() => {
                 retroAudio.playMouseDown();
+                onOpenApp('videoDemo');
+                setStartOpen(false);
+              }}
+            >
+              <RetroIcon name="video" size={24} />
+              <span>Demo Tour.avi</span>
+            </div>
+
+            <div
+              className="start-menu-item"
+              onClick={() => {
+                retroAudio.playMouseDown();
                 onOpenApp('player');
                 setStartOpen(false);
               }}

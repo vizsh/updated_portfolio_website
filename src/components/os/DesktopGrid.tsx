@@ -7,9 +7,10 @@ import { retroAudio } from '../../services/audio';
 const SHORTCUTS: DesktopShortcut[] = [
   { id: 'showcase', title: 'My Showcase', icon: 'computer', row: 0, col: 0 },
   { id: 'projects', title: 'My Projects', icon: 'folder', row: 1, col: 0 },
-  { id: 'about', title: 'About_Me.txt', icon: 'notepad', row: 2, col: 0 },
-  { id: 'resume', title: 'Resume.pdf', icon: 'resume', row: 3, col: 0 },
-  { id: 'terminal', title: 'MS-DOS Prompt', icon: 'terminal', row: 4, col: 0 },
+  { id: 'videoDemo', title: 'Demo_Tour.avi', icon: 'video', row: 2, col: 0 },
+  { id: 'about', title: 'About_Me.txt', icon: 'notepad', row: 3, col: 0 },
+  { id: 'resume', title: 'Resume.pdf', icon: 'resume', row: 4, col: 0 },
+  { id: 'terminal', title: 'MS-DOS Prompt', icon: 'terminal', row: 5, col: 0 },
   { id: 'minesweeper', title: 'Minesweeper', icon: 'minesweeper', row: 0, col: 1 },
   { id: 'snake', title: 'Snake.exe', icon: 'snake', row: 1, col: 1 },
   { id: 'player', title: 'Media Player', icon: 'player', row: 2, col: 1 },

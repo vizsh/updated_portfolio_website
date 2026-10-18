@@ -9,6 +9,7 @@ export type AppId =
   | 'minesweeper'
   | 'snake'
   | 'player'
+  | 'videoDemo'
   | 'recycleBin'
   | 'displayProperties';
 

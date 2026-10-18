@@ -47,7 +47,7 @@ export const Terminal: React.FC = () => {
           newLines.push(
             { type: 'output', text: 'Available DOS commands:' },
             { type: 'output', text: '  whoami       - Display identity, CGPA, and role' },
-            { type: 'output', text: '  whoami       - Display identity, CGPA, and role' },
+            { type: 'output', text: '  demo / video - Inspect portfolio & project demonstration video' },
             { type: 'output', text: '  repos        - List verified premier GitHub repositories' },
             { type: 'output', text: '  jarvis       - Inspect JARVIS autonomous quantitative hedge fund' },
             { type: 'output', text: '  drishti      - Inspect Drishti AI real-time exam surveillance' },
@@ -63,6 +63,17 @@ export const Terminal: React.FC = () => {
             { type: 'output', text: '  date         - Print current system timestamp' },
             { type: 'output', text: '  clear / cls  - Clear terminal screen' },
             { type: 'output', text: '  easteregg    - A secret retro transmission' }
+          );
+          break;
+
+        case 'demo':
+        case 'video':
+        case 'tour':
+          newLines.push(
+            { type: 'success', text: '>>> [PORTFOLIO & PROJECT DEMONSTRATION VIDEO (2026)] <<<' },
+            { type: 'output', text: '* File: /videos/Jeevesh_Bodhani_Portfolio_Splits.mp4 (61.5 MB, 1080p)' },
+            { type: 'output', text: '* Demonstration Covers: Drishti AI, JARVIS Deterministic Quant Engine, SIH Border Surveillance' },
+            { type: 'output', text: '* Launch: Double-click "Demo_Tour.avi" on desktop or open "Demo Tour" in Showcase Explorer.' }
           );
           break;
 

@@ -13,6 +13,8 @@ export type RetroIconType =
   | 'display'
   | 'lamp'
   | 'player'
+  | 'video'
+  | 'movie'
   | 'recycle-empty'
   | 'recycle-full'
   | 'settings'
@@ -170,6 +172,28 @@ export const RetroIcon: React.FC<RetroIconProps> = ({ name, size = 32, className
           <circle cx="16" cy="16" r="4" fill="#ffffff" stroke="#000" strokeWidth="1" />
           <circle cx="16" cy="16" r="1.5" fill="#000000" />
           <polygon points="14,13 20,16 14,19" fill="#008000" />
+        </svg>
+      );
+
+    case 'video':
+    case 'movie':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+          {/* Film clapperboard top */}
+          <polygon points="4,5 28,5 28,11 4,11" fill="#1a1a1a" stroke="#000" strokeWidth="1.5" />
+          {/* Alternating white clapper stripes */}
+          <polygon points="7,5 11,5 8,11 4,11" fill="#ffffff" />
+          <polygon points="14,5 18,5 15,11 11,11" fill="#ffffff" />
+          <polygon points="21,5 25,5 22,11 18,11" fill="#ffffff" />
+          {/* Film slate body */}
+          <rect x="4" y="11" width="24" height="17" fill="#2c3e50" stroke="#000" strokeWidth="1.5" />
+          {/* Mini CRT video viewport */}
+          <rect x="7" y="14" width="18" height="11" fill="#000000" stroke="#808080" strokeWidth="1" />
+          {/* Green play triangle */}
+          <polygon points="14,16 20,19.5 14,23" fill="#00ff66" />
+          {/* AVI tag */}
+          <rect x="19" y="12" width="8" height="4" fill="#000080" />
+          <text x="20" y="15" fill="#ffffff" fontSize="3" fontFamily="monospace" fontWeight="bold">AVI</text>
         </svg>
       );
 
