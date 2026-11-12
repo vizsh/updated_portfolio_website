@@ -16,6 +16,7 @@ import {
   CERTIFICATIONS_DATA
 } from './portfolioData';
 import { CASE_STUDIES } from './caseStudies';
+import { getRepoStats, formatDate, isCiPassing } from '../lib/githubStats';
 
 export type KnowledgeLink =
   | { kind: 'project'; projectId: string }
@@ -32,6 +33,19 @@ export interface KnowledgeChunk {
 
 const lines = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join('\n');
 const bullets = (items: string[]) => items.map(i => `- ${i}`).join('\n');
+
+/** Repo activity from the build-time GitHub snapshot, with absolute dates. */
+function activityLine(repoName?: string): string | undefined {
+  const stats = getRepoStats(repoName);
+  if (!stats) return undefined;
+  const parts = [
+    `GitHub activity (snapshot of ${formatDate(stats.fetchedAt)}): ${stats.commits} commits on ${stats.defaultBranch}`,
+    `last commit on ${formatDate(stats.lastCommitAt)}${stats.lastCommitMessage ? ` ("${stats.lastCommitMessage}")` : ''}`
+  ];
+  if (isCiPassing(stats) && stats.ci) parts.push(`latest CI run (${stats.ci.workflow}) passed`);
+  if (stats.stars > 0) parts.push(`${stats.stars} GitHub stars`);
+  return `${parts.join('; ')}.`;
+}
 
 export function buildKnowledgeChunks(): KnowledgeChunk[] {
   const chunks: KnowledgeChunk[] = [];
@@ -82,6 +96,7 @@ export function buildKnowledgeChunks(): KnowledgeChunk[] {
         project.description,
         `Tech: ${project.tech.join(', ')}.`,
         project.githubUrl && `Repository: ${project.githubUrl}`,
+        activityLine(project.repoStats?.repoName),
         `Highlights listed on the site:\n${bullets(project.features)}`,
         study &&
           lines(
@@ -108,7 +123,8 @@ export function buildKnowledgeChunks(): KnowledgeChunk[] {
       'The site has three in-browser demos, each a window on the retro desktop:',
       '- JARVIS.exe (/apps/jarvis): deterministic finance calculators (DCF valuation with a sensitivity table, a moneylender interest check, and a fee-drag calculator), showing every step of the maths.',
       '- Drishti.exe (/apps/drishti): webcam or video behaviour monitoring with public MediaPipe models; pixelates faces, learns a per-person baseline and raises persistence-gated, explained alerts. Frames never leave the browser.',
-      '- NeuroScope3D.exe (/apps/neuroscope): a synthetic brain-tumour phantom with nested WT/TC/ET regions, a cutaway plane, a linked slice view and volumes that show their formula. Not patient data.'
+      '- NeuroScope3D.exe (/apps/neuroscope): a synthetic brain-tumour phantom with nested WT/TC/ET regions, a cutaway plane, a linked slice view and volumes that show their formula. Not patient data.',
+      'In the Ask Jeevesh chat, visitors can type commands such as "open jarvis", "show the Drishti case study", "open the IBVAP repo", "open resume" or "open recruiter summary", or type "help".'
     ),
     link: { kind: 'app', slug: 'jarvis' }
   });

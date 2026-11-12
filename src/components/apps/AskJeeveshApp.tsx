@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { askJeevesh, isAiUnavailable, type ChatTurn } from '../../lib/ask';
+import { parseChatCommand, HELP_TEXT, type ChatCommand } from '../../lib/askCommands';
 import { buildKnowledgeChunks, type KnowledgeChunk } from '../../data/knowledge';
+import { demoWindowFor } from '../../data/caseStudies';
+import { PERSONAL_INFO, PROJECTS_DATA } from '../../data/portfolioData';
 import { RetroIcon } from '../common/RetroIcon';
 import { retroAudio } from '../../services/audio';
 import type { AppId } from '../../types/os';
@@ -9,12 +12,18 @@ interface ChatMessage extends ChatTurn {
   sources?: string[];
   mode?: 'ai' | 'offline';
   notice?: string;
+  /** Greeting and command replies: shown in the chat, never sent to the assistant. */
+  local?: boolean;
 }
+
+const STORAGE_KEY = 'ask-jeevesh-chat-v1';
+const MAX_STORED = 40;
 
 const GREETING: ChatMessage = {
   role: 'assistant',
+  local: true,
   content:
-    "Hi! I'm the assistant for this portfolio. Ask me anything about Jeevesh's projects, skills, experience or how to get in touch. I answer only from what's on this site, with sources."
+    "Hi! I'm the assistant for this portfolio. Ask me anything about Jeevesh's projects, skills, experience or how to get in touch. I answer only from what's on this site, with sources. Type \"help\" to see what else I can do."
 };
 
 const SUGGESTIONS = [
@@ -22,12 +31,33 @@ const SUGGESTIONS = [
   "What are NeuroScope 3D's accuracy numbers?",
   'What did Jeevesh build for Smart India Hackathon?',
   'How does JARVIS avoid hallucinated numbers?',
+  'open jarvis',
   'How can I contact Jeevesh?'
 ];
 
-interface AskJeeveshAppProps {
-  onOpenProject?: (projectId: string) => void;
-  onOpenApp?: (appId: AppId) => void;
+const DEMO_LABEL: Partial<Record<AppId, string>> = {
+  jarvis: 'JARVIS.exe',
+  drishti: 'Drishti.exe',
+  neuroscope: 'NeuroScope3D.exe'
+};
+
+const shortTitle = (title: string) => title.split(' — ')[0];
+
+const isChatMessage = (m: unknown): m is ChatMessage =>
+  !!m &&
+  typeof m === 'object' &&
+  ((m as ChatMessage).role === 'user' || (m as ChatMessage).role === 'assistant') &&
+  typeof (m as ChatMessage).content === 'string';
+
+/** The conversation survives minimising/closing the window for the rest of the browser session. */
+function loadMessages(): ChatMessage[] {
+  try {
+    const parsed: unknown = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? 'null');
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(isChatMessage)) return parsed.slice(-MAX_STORED);
+  } catch {
+    // Storage unavailable (private mode) or corrupted: start fresh.
+  }
+  return [GREETING];
 }
 
 /** Render "[id]" citations as numbered markers, in order of first appearance. */
@@ -39,26 +69,38 @@ function renderWithCitations(text: string, order: string[]): React.ReactNode[] {
   while ((match = re.exec(text))) {
     parts.push(text.slice(last, match.index));
     const n = order.indexOf(match[1]);
-    parts.push(
-      n >= 0 ? (
+    if (n >= 0) {
+      parts.push(
         <sup key={`${match.index}-${match[1]}`} style={{ color: '#000080', fontWeight: 'bold' }}>
           [{n + 1}]
         </sup>
-      ) : (
-        ''
-      )
-    );
+      );
+    }
     last = match.index + match[0].length;
   }
   parts.push(text.slice(last));
   return parts;
 }
 
-export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onOpenApp }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
+interface Chip {
+  label: string;
+  run: () => void;
+  /** Follow-up questions are sent; other chips act on the desktop. */
+  kind: 'action' | 'question';
+}
+
+interface AskJeeveshAppProps {
+  onOpenProject?: (projectId: string) => void;
+  onOpenApp?: (appId: AppId) => void;
+  onOpenRecruiterMode?: () => void;
+}
+
+export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onOpenApp, onOpenRecruiterMode }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
   const [input, setInput] = useState('');
   const [pending, setPending] = useState(false);
   const [offline, setOffline] = useState(isAiUnavailable());
+  const [emailCopied, setEmailCopied] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -68,19 +110,58 @@ export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onO
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, pending]);
 
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-MAX_STORED)));
+    } catch {
+      // Storage full or unavailable: the chat still works, it just won't be remembered.
+    }
+  }, [messages]);
+
+  const openUrl = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
+
+  /** Carry out a site command and return the chat's reply. */
+  const runCommand = (command: ChatCommand): string => {
+    switch (command.kind) {
+      case 'help':
+        return HELP_TEXT;
+      case 'app':
+        onOpenApp?.(command.appId);
+        return `Opening ${command.label}…`;
+      case 'project':
+        onOpenProject?.(command.projectId);
+        return `Opening the ${command.label} case study…`;
+      case 'url':
+        openUrl(command.url);
+        return `Opening ${command.label} in a new tab…`;
+      case 'recruiter':
+        if (!onOpenRecruiterMode) return 'The one-page recruiter summary is at /recruiter/.';
+        // Let the reply render and save before the desktop is swapped out.
+        setTimeout(onOpenRecruiterMode, 600);
+        return 'Switching to the one-page recruiter summary…';
+    }
+  };
+
   const send = async (text: string) => {
     const question = text.trim();
     if (!question || pending) return;
     retroAudio.playMouseDown();
+    setInput('');
+
+    const command = parseChatCommand(question);
+    if (command) {
+      const reply = runCommand(command);
+      setMessages(prev => [...prev, { role: 'user', content: question, local: true }, { role: 'assistant', content: reply, local: true }]);
+      return;
+    }
+
     const next: ChatMessage[] = [...messages, { role: 'user', content: question }];
     setMessages(next);
-    setInput('');
     setPending(true);
     try {
-      const history: ChatTurn[] = next
-        .filter(m => m !== GREETING)
-        .map(m => ({ role: m.role, content: m.content.slice(0, 800) }));
-      const result = await askJeevesh(history);
+      const history: ChatTurn[] = next.filter(m => !m.local).map(m => ({ role: m.role, content: m.content.slice(0, 800) }));
+      const context = [...messages].reverse().find(m => m.role === 'assistant' && m.sources?.length)?.sources ?? [];
+      const result = await askJeevesh(history, context);
       setOffline(result.mode === 'offline');
       setMessages(prev => [
         ...prev,
@@ -93,14 +174,77 @@ export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onO
     }
   };
 
+  const newChat = () => {
+    retroAudio.playMouseDown();
+    setMessages([GREETING]);
+    setInput('');
+    inputRef.current?.focus();
+  };
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(PERSONAL_INFO.email);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch {
+      window.location.assign(`mailto:${PERSONAL_INFO.email}`);
+    }
+  };
+
   const openSource = (chunk: KnowledgeChunk) => {
     retroAudio.playMouseDown();
     const link = chunk.link;
     if (!link) return;
     if (link.kind === 'project') onOpenProject?.(link.projectId);
     else if (link.kind === 'app') onOpenApp?.(link.slug);
-    else window.open(link.url, '_blank', 'noopener');
+    else openUrl(link.url);
   };
+
+  /** Next steps for the latest answer: demos, repos, contact actions and follow-up questions. */
+  const chipsFor = (message: ChatMessage, question?: string): Chip[] => {
+    if (message.local) return [];
+    const ids = (message.sources ?? []).filter(id => chunks.has(id));
+    const projectIds = ids.filter(id => chunks.get(id)?.link?.kind === 'project');
+    const chips: Chip[] = [];
+
+    for (const id of projectIds.slice(0, 2)) {
+      const name = shortTitle(chunks.get(id)!.title);
+      const demo = demoWindowFor(id);
+      if (demo) chips.push({ kind: 'action', label: `▶ Try ${DEMO_LABEL[demo] ?? name}`, run: () => onOpenApp?.(demo) });
+      const repo = PROJECTS_DATA.find(p => p.id === id)?.githubUrl;
+      if (repo) chips.push({ kind: 'action', label: `🔗 ${name} repo`, run: () => openUrl(repo) });
+    }
+    if (ids.includes('demos')) {
+      (['jarvis', 'drishti', 'neuroscope'] as AppId[]).forEach(app =>
+        chips.push({ kind: 'action', label: `▶ ${DEMO_LABEL[app]}`, run: () => onOpenApp?.(app) })
+      );
+    }
+    if (ids.includes('contact')) {
+      chips.push({ kind: 'action', label: '✉ Email Jeevesh', run: () => window.location.assign(`mailto:${PERSONAL_INFO.email}`) });
+      chips.push({ kind: 'action', label: emailCopied ? '✔ Email copied' : '📋 Copy email', run: () => void copyEmail() });
+      chips.push({ kind: 'action', label: '📄 Open resume', run: () => onOpenApp?.('resume') });
+    }
+    if (ids.length === 0 && question) {
+      chips.push({
+        kind: 'action',
+        label: '✉ Email this question to Jeevesh',
+        run: () =>
+          window.location.assign(
+            `mailto:${PERSONAL_INFO.email}?subject=${encodeURIComponent('Question from your portfolio site')}&body=${encodeURIComponent(question)}`
+          )
+      });
+    }
+    if (projectIds.length) {
+      chips.push({ kind: 'question', label: 'What are its limits?', run: () => void send('What are its limits?') });
+      chips.push({ kind: 'question', label: 'How was it built?', run: () => void send('How was it built?') });
+    }
+    return chips;
+  };
+
+  const lastIndex = messages.length - 1;
+  const lastMessage = messages[lastIndex];
+  const lastQuestion = [...messages].reverse().find(m => m.role === 'user')?.content;
+  const latestChips = !pending && lastMessage?.role === 'assistant' ? chipsFor(lastMessage, lastQuestion) : [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ece9d8', fontSize: '12px' }}>
@@ -116,7 +260,7 @@ export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onO
         }}
       >
         <RetroIcon name="chat" size={30} />
-        <div style={{ lineHeight: 1.25 }}>
+        <div style={{ lineHeight: 1.25, flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 'bold', color: '#0b2545' }}>Ask Jeevesh: portfolio assistant</div>
           <div style={{ fontSize: '10.5px', color: offline ? '#8a4b00' : '#2b6e3f' }}>
             {offline
@@ -124,6 +268,15 @@ export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onO
               : '● Online: answers by Claude, grounded in this portfolio'}
           </div>
         </div>
+        <button
+          className="win-button"
+          onClick={newChat}
+          disabled={pending || messages.length <= 1}
+          style={{ fontSize: '10.5px', padding: '2px 8px' }}
+          title="Start a new conversation"
+        >
+          New chat
+        </button>
       </div>
 
       {/* Conversation */}
@@ -174,6 +327,27 @@ export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onO
                   })}
                 </div>
               )}
+              {i === lastIndex && latestChips.length > 0 && (
+                <div style={{ paddingLeft: '8px', marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  {latestChips.map(chip => (
+                    <button
+                      key={chip.label}
+                      className="win-button"
+                      onClick={() => {
+                        if (chip.kind === 'action') retroAudio.playMouseDown();
+                        chip.run();
+                      }}
+                      style={{
+                        fontSize: '10.5px',
+                        padding: '1px 7px',
+                        fontStyle: chip.kind === 'question' ? 'italic' : 'normal'
+                      }}
+                    >
+                      {chip.kind === 'question' ? `💬 ${chip.label}` : chip.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
@@ -206,10 +380,13 @@ export const AskJeeveshApp: React.FC<AskJeeveshAppProps> = ({ onOpenProject, onO
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               void send(input);
+            } else if (e.key === 'ArrowUp' && !input && lastQuestion) {
+              e.preventDefault();
+              setInput(lastQuestion);
             }
           }}
           rows={2}
-          placeholder="Type a question and press Enter…"
+          placeholder='Ask a question, or type "help" / "open jarvis"…'
           className="win-inset"
           aria-label="Your question"
           style={{ flex: 1, resize: 'none', padding: '4px 6px', fontSize: '12px', fontFamily: 'inherit', background: '#ffffff' }}

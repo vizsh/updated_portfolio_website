@@ -62,6 +62,12 @@ const SYNONYMS: Record<string, string[]> = {
   why: ['decision', 'because'],
   decision: ['decision', 'because'],
   architecture: ['architecture', 'pipeline'],
+  built: ['architecture', 'pipeline', 'tech'],
+  build: ['architecture', 'pipeline', 'tech'],
+  works: ['architecture', 'pipeline'],
+  active: ['commit', 'github'],
+  maintained: ['commit', 'github'],
+  commits: ['commit', 'github'],
   skill: ['skill', 'technical'],
   skills: ['skill', 'technical'],
   familiar: ['skill'],
@@ -86,6 +92,7 @@ function stem(t: string): string {
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
+    .replace(/['’]s\b/g, '')
     .replace(/['’]/g, '')
     .split(/[^a-z0-9+#.]+/)
     .map(t => t.replace(/^\.+|\.+$/g, ''))
@@ -133,6 +140,7 @@ interface QueryTerm {
 function parseQuery(question: string): QueryTerm[] {
   const words = question
     .toLowerCase()
+    .replace(/['’]s\b/g, '')
     .replace(/['’]/g, '')
     .split(/[^a-z0-9+#.]+/)
     .map(t => t.replace(/^\.+|\.+$/g, ''))
@@ -167,7 +175,7 @@ function rank(terms: string[]): { doc: IndexedChunk; score: number }[] {
         const n = df.get(term) ?? 0;
         const idf = Math.log(1 + (docs.length - n + 0.5) / (n + 0.5));
         score += (idf * (freq * (k1 + 1))) / (freq + k1 * (1 - b + (b * doc.length) / avgLength));
-        if (doc.titleTerms.has(term)) score += 1.5 * idf;
+        if (doc.titleTerms.has(term)) score += 3 * idf;
       }
       return { doc, score };
     })
@@ -194,18 +202,22 @@ const idfOf = (term: string) => {
 
 /** Pick the most relevant sentences of one chunk, in their original order. */
 function bestUnits(doc: IndexedChunk, query: QueryTerm[], wantsNumbers: boolean, max = 3): string[] {
-  // Words already in the chunk's title (e.g. "JARVIS") say nothing about which sentence answers.
-  const forms = allForms(query).filter(f => !doc.titleTerms.has(f));
+  // The visitor's own words count fully, expansions (synonyms) count less. Words already in
+  // the chunk's title (e.g. "JARVIS") say nothing about which sentence answers.
+  const weights = new Map<string, number>();
+  for (const q of query) {
+    for (const f of q.forms) weights.set(f, Math.max(weights.get(f) ?? 0, f === q.term ? 1 : 0.4));
+  }
+  const forms = [...weights.keys()].filter(f => !doc.titleTerms.has(f));
   const scored = units(doc.chunk.text).map((text, i) => {
     const terms = new Set(tokenize(text));
-    let score = forms.reduce((acc, f) => acc + (terms.has(f) ? idfOf(f) : 0), 0);
+    let score = forms.reduce((acc, f) => acc + (terms.has(f) ? idfOf(f) * weights.get(f)! : 0), 0);
     if (score > 0 && wantsNumbers && /\d/.test(text)) score += 0.75;
     return { text, i, score };
   });
-  const best = scored
-    .filter(u => u.score > 0)
-    .sort((a, b) => b.score - a.score || a.i - b.i)
-    .slice(0, max);
+  const ranked = scored.filter(u => u.score > 0).sort((a, b) => b.score - a.score || a.i - b.i);
+  // Keep only sentences that are about as relevant as the best one.
+  const best = ranked.filter(u => u.score >= ranked[0].score * 0.5).slice(0, max);
   const picked = new Set((best.length ? best : scored.slice(0, 2)).map(u => u.i));
   for (const i of [...picked]) {
     if (scored[i].text.startsWith('- ')) continue;
@@ -228,6 +240,9 @@ const NOT_FOUND = {
   sources: [] as string[]
 };
 
+/** Pronouns that point back at the previous answer ("what are its limits?", "tell me more about it"). */
+const FOLLOW_UP = /\b(it|its|it's|this|that|they|their|them|these|those|same|more)\b/i;
+
 const LIST_INTENT =
   /\b(which|what|list|any|all)\b[^?]*\bprojects?\b|\bprojects?\b[^?]*\b(use|uses|using|with|involve|built)\b/i;
 
@@ -236,7 +251,11 @@ export interface LocalAnswer {
   sources: string[];
 }
 
-export function answerLocally(question: string): LocalAnswer {
+/**
+ * @param context ids cited in the previous answer, so follow-up questions
+ *                ("what are its limits?") stay on the same project.
+ */
+export function answerLocally(question: string, context: string[] = []): LocalAnswer {
   const q = question.trim();
   if (/^(hi|hello|hey|namaste)\b/i.test(q) && q.split(/\s+/).length <= 3) {
     return {
@@ -246,7 +265,8 @@ export function answerLocally(question: string): LocalAnswer {
   }
 
   const query = parseQuery(q);
-  if (query.length === 0) return NOT_FOUND;
+  const isFollowUp = context.length > 0 && FOLLOW_UP.test(q);
+  if (query.length === 0 && !isFollowUp) return NOT_FOUND;
   const wantsNumbers = NUMBER_INTENT.test(q);
 
   // "Which projects use X?": list every project that mentions X.
@@ -268,6 +288,21 @@ export function answerLocally(question: string): LocalAnswer {
   }
 
   const ranked = rank(allForms(query));
+
+  // Follow-ups stay on the previous answer's chunk unless the question names another one.
+  if (isFollowUp) {
+    const namesAnother = ranked
+      .slice(0, 3)
+      .some(r => !context.includes(r.doc.chunk.id) && query.some(t => t.forms.some(f => r.doc.titleTerms.has(f))));
+    const previous = ranked.find(r => context.includes(r.doc.chunk.id));
+    if (previous && !namesAnother) {
+      return {
+        answer: `${joinUnits(bestUnits(previous.doc, query, wantsNumbers))} [${previous.doc.chunk.id}]`,
+        sources: [previous.doc.chunk.id]
+      };
+    }
+  }
+
   const top = ranked[0];
   // Off-topic guard: the best chunk must cover most of what was asked, not one stray word.
   const coverage = top ? matchedTerms(query, top.doc) / query.length : 0;

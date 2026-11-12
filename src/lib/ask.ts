@@ -18,7 +18,11 @@ let apiUnavailable = false;
 
 export const isAiUnavailable = () => apiUnavailable;
 
-export async function askJeevesh(history: ChatTurn[]): Promise<AskResult> {
+/**
+ * @param context ids cited in the previous answer; offline search uses them so
+ *                follow-ups ("what are its limits?") stay on the same project.
+ */
+export async function askJeevesh(history: ChatTurn[], context: string[] = []): Promise<AskResult> {
   const question = [...history].reverse().find(t => t.role === 'user')?.content ?? '';
 
   if (!apiUnavailable) {
@@ -37,7 +41,7 @@ export async function askJeevesh(history: ChatTurn[]): Promise<AskResult> {
       }
       if (res.status === 429) {
         return {
-          ...answerLocally(question),
+          ...answerLocally(question, context),
           mode: 'offline',
           notice: data?.message ?? 'The assistant is busy; this answer comes from offline search.'
         };
@@ -49,5 +53,5 @@ export async function askJeevesh(history: ChatTurn[]): Promise<AskResult> {
     }
   }
 
-  return { ...answerLocally(question), mode: 'offline' };
+  return { ...answerLocally(question, context), mode: 'offline' };
 }

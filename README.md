@@ -56,6 +56,11 @@ An interactive 3D retro desktop portfolio bridging a spatial 3D study workstatio
 - **Drishti.exe**: webcam/video behaviour monitor with MediaPipe pose + object detection, face pixelation, per-person z-score baselines and persistence-gated, explained alerts. Frames never leave the browser.
 - **NeuroScope3D.exe**: a synthetic brain-tumour phantom with nested WT/TC/ET regions, cutaway plane, linked slice view and volumes that show their formula. Not patient data.
 - **Ask Jeevesh**: a portfolio assistant (window or `ask <question>` in MS-DOS Prompt) that answers only from the site's data, with citations. It uses Claude via `api/ask.ts` when an API key is configured; otherwise it falls back to offline keyword search.
+  - Site commands: `open jarvis`, `show the Drishti case study`, `open the IBVAP repo`, `open resume`, `open recruiter summary`, `help`.
+  - Follow-up questions keep their context ("what are its limits?"), even offline.
+  - Buttons under each answer: try the demo, open the repo, email or copy the contact address, or email an unanswered question.
+  - Knows each repo's activity (commit count, last commit date) from the build-time GitHub snapshot.
+  - The conversation survives minimizing or closing the window for the browser session. "New chat" clears it, and ↑ recalls the last question.
 
 ---
 

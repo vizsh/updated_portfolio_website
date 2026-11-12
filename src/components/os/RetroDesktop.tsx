@@ -704,7 +704,7 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         onMaximizeToggle={() => toggleMaximize('ask')}
         onUpdateBounds={(pos, size) => updateWindowBounds('ask', pos, size)}
       >
-        <AskJeeveshApp onOpenProject={openProject} onOpenApp={openApp} />
+        <AskJeeveshApp onOpenProject={openProject} onOpenApp={openApp} onOpenRecruiterMode={onOpenRecruiterMode} />
       </RetroWindow>
 
       {/* Right-Click Desktop Context Menu */}
