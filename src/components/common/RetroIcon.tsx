@@ -28,7 +28,11 @@ export type RetroIconType =
   | 'minimize'
   | 'close'
   | 'restore'
-  | 'back';
+  | 'back'
+  | 'jarvis'
+  | 'eye'
+  | 'brain'
+  | 'chat';
 
 interface RetroIconProps {
   name: RetroIconType;
@@ -243,6 +247,53 @@ export const RetroIcon: React.FC<RetroIconProps> = ({ name, size = 32, className
       return (
         <svg width={size} height={size} viewBox="0 0 16 16" fill="currentColor" className={className}>
           <path d="M1 5v6h2l4 4V1L3 5H1zm11.5 3c0-.85-.24-1.63-.66-2.3l1.45-1.45C14.07 5.25 14.5 6.58 14.5 8c0 3.07-1.92 5.67-4.63 6.63l-.7-1.99C11.12 12.03 12.5 10.18 12.5 8zm-2.03-4.99l1.44-1.44C10.74.87 9.42.43 8 .43v2.06c1.07 0 2.07.35 2.91.95l-.44.57zM1.71 1.28L.29 2.71 13.29 15.7l1.41-1.42L1.71 1.28z"/>
+        </svg>
+      );
+
+    case 'jarvis':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+          <rect x="3" y="4" width="26" height="22" fill="#000080" stroke="#000" strokeWidth="1.5" />
+          <rect x="5" y="6" width="22" height="18" fill="#071018" />
+          <polyline points="6,21 11,16 15,18 20,11 26,8" stroke="#39ff14" strokeWidth="2" fill="none" />
+          <text x="7" y="13" fill="#ffff55" fontSize="8" fontWeight="bold" fontFamily="monospace">₹</text>
+          <rect x="9" y="26" width="14" height="3" fill="#c0c0c0" stroke="#000" strokeWidth="1" />
+        </svg>
+      );
+
+    case 'eye':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+          <rect x="3" y="6" width="26" height="20" fill="#c0c0c0" stroke="#000" strokeWidth="1.5" />
+          <path d="M6 16 Q16 6 26 16 Q16 26 6 16 Z" fill="#ffffff" stroke="#000" strokeWidth="1.5" />
+          <circle cx="16" cy="16" r="4.5" fill="#008080" stroke="#000" strokeWidth="1" />
+          <circle cx="16" cy="16" r="2" fill="#000" />
+          <rect x="5" y="8" width="4" height="3" fill="#e63946" />
+        </svg>
+      );
+
+    case 'brain':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+          <path d="M16 6 C10 4 5 8 5 13 C3 15 4 20 7 21 C8 25 13 27 16 25 C19 27 24 25 25 21 C28 20 29 15 27 13 C27 8 22 4 16 6 Z" fill="#ffc4d6" stroke="#000" strokeWidth="1.5" />
+          <path d="M16 6 L16 25" stroke="#000" strokeWidth="1" />
+          <path d="M9 12 Q12 14 10 17 M23 12 Q20 14 22 17" stroke="#b5487a" strokeWidth="1.2" fill="none" />
+          <circle cx="20.5" cy="17" r="3.2" fill="#e63946" stroke="#000" strokeWidth="1" />
+          <circle cx="20.5" cy="17" r="1.4" fill="#ffca3a" />
+        </svg>
+      );
+
+    case 'chat':
+      return (
+        <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+          <circle cx="11" cy="10" r="4" fill="#2fa84f" stroke="#000" strokeWidth="1.2" />
+          <path d="M4 22 C4 16 18 16 18 22 Z" fill="#2fa84f" stroke="#000" strokeWidth="1.2" />
+          <circle cx="21" cy="11" r="4" fill="#3a86ff" stroke="#000" strokeWidth="1.2" />
+          <path d="M14 23 C14 17 28 17 28 23 Z" fill="#3a86ff" stroke="#000" strokeWidth="1.2" />
+          <rect x="16" y="22" width="13" height="7" rx="1" fill="#ffffff" stroke="#000" strokeWidth="1" />
+          <circle cx="19.5" cy="25.5" r="0.9" fill="#000" />
+          <circle cx="22.5" cy="25.5" r="0.9" fill="#000" />
+          <circle cx="25.5" cy="25.5" r="0.9" fill="#000" />
         </svg>
       );
 

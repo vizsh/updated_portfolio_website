@@ -11,7 +11,11 @@ export type AppId =
   | 'player'
   | 'videoDemo'
   | 'recycleBin'
-  | 'displayProperties';
+  | 'displayProperties'
+  | 'jarvis'
+  | 'drishti'
+  | 'neuroscope'
+  | 'ask';
 
 export interface Position {
   x: number;

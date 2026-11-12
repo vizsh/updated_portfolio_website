@@ -1,0 +1,94 @@
+{
+  "fetchedAt": "2026-11-12T14:15:04.872Z",
+  "source": "api.github.com",
+  "repos": {
+    "vizsh/Jarvis_Hedge_Fund": {
+      "url": "https://github.com/vizsh/Jarvis_Hedge_Fund",
+      "defaultBranch": "master",
+      "language": "Python",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-10-06T11:01:36Z",
+      "commits": 72,
+      "lastCommitAt": "2026-10-06T11:01:30Z",
+      "lastCommitMessage": "Rewrite README with diagrams and prototype screenshots; add business, impact, competitor and pilot docs; fix home tile l",
+      "ci": null,
+      "fetchedAt": "2026-11-12T13:39:07.843Z"
+    },
+    "vizsh/Drishti_AI": {
+      "url": "https://github.com/vizsh/Drishti_AI",
+      "defaultBranch": "master",
+      "language": "Python",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-08-23T00:27:32Z",
+      "commits": 79,
+      "lastCommitAt": "2026-08-23T00:27:19Z",
+      "lastCommitMessage": "Recalibrate Hall D from measured pixel grid — 3 confident seats, not 6 guessed",
+      "ci": null,
+      "fetchedAt": "2026-11-12T13:39:07.846Z"
+    },
+    "vizsh/DecentralisedIntelligence_NeuroScope3d_Outliers3797_PS02": {
+      "url": "https://github.com/vizsh/DecentralisedIntelligence_NeuroScope3d_Outliers3797_PS02",
+      "defaultBranch": "main",
+      "language": "HTML",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-10-17T10:20:59Z",
+      "commits": 42,
+      "lastCommitAt": "2026-10-17T10:20:55Z",
+      "lastCommitMessage": "Refresh README/FEATURES for judge review: current screenshots, verified new features",
+      "ci": {
+        "conclusion": "failure",
+        "workflow": "CI",
+        "url": "https://github.com/vizsh/DecentralisedIntelligence_NeuroScope3d_Outliers3797_PS02/actions/runs/39024559670",
+        "finishedAt": "2026-10-17T10:22:17Z"
+      },
+      "fetchedAt": "2026-11-12T13:39:07.846Z"
+    },
+    "vizsh/Pillai_Hotel360": {
+      "url": "https://github.com/vizsh/Pillai_Hotel360",
+      "defaultBranch": "main",
+      "language": "TypeScript",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-09-27T08:05:38Z",
+      "commits": 56,
+      "lastCommitAt": "2026-09-27T08:05:35Z",
+      "lastCommitMessage": "Add the 16th Automation Scenario: social signal predicts a weather event",
+      "ci": {
+        "conclusion": "success",
+        "workflow": "CI",
+        "url": "https://github.com/vizsh/Pillai_Hotel360/actions/runs/36305117366",
+        "finishedAt": "2026-09-27T08:07:10Z"
+      },
+      "fetchedAt": "2026-11-12T13:39:07.846Z"
+    },
+    "vizsh/SIH_IBVAP": {
+      "url": "https://github.com/vizsh/SIH_IBVAP",
+      "defaultBranch": "main",
+      "language": "TypeScript",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-09-29T15:18:46Z",
+      "commits": 35,
+      "lastCommitAt": "2026-09-29T15:17:45Z",
+      "lastCommitMessage": "Fix broken demo on fresh clone: check in videos + model weights, add one-click demo login",
+      "ci": null,
+      "fetchedAt": "2026-11-12T14:15:04.870Z"
+    },
+    "vizsh/updated_portfolio_website": {
+      "url": "https://github.com/vizsh/updated_portfolio_website",
+      "defaultBranch": "main",
+      "language": "TypeScript",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-10-18T19:14:10Z",
+      "commits": 4,
+      "lastCommitAt": "2026-10-18T19:14:03Z",
+      "lastCommitMessage": "chore(vercel): configure byte-range streaming for demo video and refine SPA rewrites",
+      "ci": null,
+      "fetchedAt": "2026-11-12T14:15:04.872Z"
+    }
+  }
+}

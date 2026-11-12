@@ -5,11 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "stats": "node scripts/fetch-github-stats.mjs",
+    "prebuild": "node scripts/fetch-github-stats.mjs",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@mediapipe/tasks-vision": "^1.2.3",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@types/canvas-confetti": "^1.9.0",

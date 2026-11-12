@@ -1,14 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { RetroDeskScene } from './components/scene/RetroDeskScene';
-import { RetroDesktop } from './components/os/RetroDesktop';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { TopHUD } from './components/common/TopHUD';
 import { CRTStartupBloom } from './components/common/CRTStartupBloom';
+import { RecruiterMode } from './components/recruiter/RecruiterMode';
 import { retroAudio } from './services/audio';
-import type { CameraViewMode } from './types/os';
+import { readInitialRoute, replaceUrl, projectPath, appPath, RECRUITER_PATH, type InitialRoute } from './lib/route';
+import type { AppId, CameraViewMode } from './types/os';
+
+// The 3D scene (three.js + R3F, ~1 MB) and the OS are code-split so the
+// recruiter summary can load without downloading either of them.
+const RetroDeskScene = lazy(() =>
+  import('./components/scene/RetroDeskScene').then(m => ({ default: m.RetroDeskScene }))
+);
+const RetroDesktop = lazy(() =>
+  import('./components/os/RetroDesktop').then(m => ({ default: m.RetroDesktop }))
+);
+
+type ExperienceMode = 'recruiter' | 'desktop';
 
 export const App: React.FC = () => {
-  // Mobile devices default to screen mode for optimal touch ergonomics
+  const [initialRoute] = useState<InitialRoute>(readInitialRoute);
+
+  const [mode, setMode] = useState<ExperienceMode>(
+    initialRoute.kind === 'recruiter' ? 'recruiter' : 'desktop'
+  );
+
+  // The route the OS should honour when it mounts (deep link or recruiter hand-off)
+  const [desktopRoute, setDesktopRoute] = useState<InitialRoute>(initialRoute);
+
+  // Deep links go straight to the screen; mobile devices default to screen mode
+  // for touch ergonomics; everyone else starts at the desk.
   const [viewMode, setViewMode] = useState<CameraViewMode>(() => {
+    if (initialRoute.kind === 'project' || initialRoute.kind === 'app') return 'screen';
     if (typeof window !== 'undefined') {
       return window.innerWidth < 768 ? 'screen' : 'desk';
     }
@@ -27,7 +49,7 @@ export const App: React.FC = () => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('retro_crt_intensity');
       if (saved && ['off', 'subtle', 'authentic', 'heavy'].includes(saved)) {
-        return saved as any;
+        return saved as 'off' | 'subtle' | 'authentic' | 'heavy';
       }
     }
     return 'authentic';
@@ -37,22 +59,23 @@ export const App: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  const isDesktopMode = mode === 'desktop';
   const isZoomedIn = viewMode === 'screen';
 
-  // Play startup sound on first user interaction
+  // Play startup sound on first user interaction (desktop experience only)
   useEffect(() => {
+    if (!isDesktopMode || hasInteracted) return;
     const handleFirstClick = () => {
-      if (!hasInteracted) {
-        setHasInteracted(true);
-        retroAudio.playStartup();
-      }
+      setHasInteracted(true);
+      retroAudio.playStartup();
     };
     window.addEventListener('click', handleFirstClick, { once: true });
     return () => window.removeEventListener('click', handleFirstClick);
-  }, [hasInteracted]);
+  }, [hasInteracted, isDesktopMode]);
 
   // Global keyboard shortcut: Escape steps back (Screen -> Desk -> Room)
   useEffect(() => {
+    if (!isDesktopMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (viewMode === 'screen') {
@@ -66,7 +89,7 @@ export const App: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [viewMode]);
+  }, [viewMode, isDesktopMode]);
 
   const toggleLamp = () => {
     setIsNightMode(prev => {
@@ -90,6 +113,37 @@ export const App: React.FC = () => {
     }
   }, [toastMessage]);
 
+  const openRecruiterMode = () => {
+    setMode('recruiter');
+    replaceUrl(RECRUITER_PATH);
+    window.scrollTo(0, 0);
+  };
+
+  const enterDesktop = (route: InitialRoute = { kind: 'home' }) => {
+    setDesktopRoute(route);
+    if (route.kind === 'project') {
+      setViewMode('screen');
+      replaceUrl(projectPath(route.projectId));
+    } else if (route.kind === 'app') {
+      setViewMode('screen');
+      replaceUrl(appPath(route.appId));
+    } else {
+      setViewMode(typeof window !== 'undefined' && window.innerWidth < 768 ? 'screen' : 'desk');
+      replaceUrl('/');
+    }
+    setMode('desktop');
+  };
+
+  if (mode === 'recruiter') {
+    return (
+      <RecruiterMode
+        onEnterDesktop={() => enterDesktop()}
+        onOpenProject={(projectId: string) => enterDesktop({ kind: 'project', projectId })}
+        onOpenApp={(appId: AppId) => enterDesktop({ kind: 'app', appId })}
+      />
+    );
+  }
+
   return (
     <main
       style={{
@@ -101,14 +155,16 @@ export const App: React.FC = () => {
       }}
     >
       {/* 1. Physical 3D Room & Entrance Desk Scene */}
-      <RetroDeskScene
-        viewMode={viewMode}
-        onChangeView={setViewMode}
-        isNightMode={isNightMode}
-        onToggleLamp={toggleLamp}
-        onHoverItem={setHoveredItem}
-        onInteract={handleInteract}
-      />
+      <Suspense fallback={<SceneLoadingFallback />}>
+        <RetroDeskScene
+          viewMode={viewMode}
+          onChangeView={setViewMode}
+          isNightMode={isNightMode}
+          onToggleLamp={toggleLamp}
+          onHoverItem={setHoveredItem}
+          onInteract={handleInteract}
+        />
+      </Suspense>
 
       {/* 2. Interactive Retro Windows 98 Operating System Layer */}
       <div
@@ -124,11 +180,15 @@ export const App: React.FC = () => {
           zIndex: 100
         }}
       >
-        <RetroDesktop
-          onToggle3DMode={() => setViewMode('desk')}
-          crtIntensity={crtIntensity}
-          onChangeCrtIntensity={setCrtIntensity}
-        />
+        <Suspense fallback={null}>
+          <RetroDesktop
+            onToggle3DMode={() => setViewMode('desk')}
+            onOpenRecruiterMode={openRecruiterMode}
+            initialRoute={desktopRoute}
+            crtIntensity={crtIntensity}
+            onChangeCrtIntensity={setCrtIntensity}
+          />
+        </Suspense>
 
         {/* Authentic CRT Scanline & Phosphor Vignette Overlay */}
         <div className={`crt-overlay crt-${crtIntensity}`} />
@@ -145,6 +205,7 @@ export const App: React.FC = () => {
           isNightMode={isNightMode}
           onToggleLamp={toggleLamp}
           hoveredItem={hoveredItem}
+          onOpenRecruiterMode={openRecruiterMode}
         />
       )}
 
@@ -220,5 +281,23 @@ export const App: React.FC = () => {
     </main>
   );
 };
+
+const SceneLoadingFallback: React.FC = () => (
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#39ff14',
+      fontFamily: 'var(--font-dos), monospace',
+      fontSize: '18px',
+      letterSpacing: '1px'
+    }}
+  >
+    LOADING WORKSTATION...
+  </div>
+);
 
 export default App;
