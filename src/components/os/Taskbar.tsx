@@ -11,6 +11,7 @@ interface TaskbarProps {
   onOpenApp: (id: AppId) => void;
   onShutdown: () => void;
   onToggle3DMode: () => void;
+  onOpenRecruiterMode?: () => void;
 }
 
 export const Taskbar: React.FC<TaskbarProps> = ({
@@ -19,7 +20,8 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   onSelectWindow,
   onOpenApp,
   onShutdown,
-  onToggle3DMode
+  onToggle3DMode,
+  onOpenRecruiterMode
 }) => {
   const [startOpen, setStartOpen] = useState(false);
   const [timeStr, setTimeStr] = useState('');
@@ -125,6 +127,54 @@ export const Taskbar: React.FC<TaskbarProps> = ({
               className="start-menu-item"
               onClick={() => {
                 retroAudio.playMouseDown();
+                onOpenApp('jarvis');
+                setStartOpen(false);
+              }}
+            >
+              <RetroIcon name="jarvis" size={24} />
+              <span>JARVIS.exe (Finance Demo)</span>
+            </div>
+
+            <div
+              className="start-menu-item"
+              onClick={() => {
+                retroAudio.playMouseDown();
+                onOpenApp('drishti');
+                setStartOpen(false);
+              }}
+            >
+              <RetroIcon name="eye" size={24} />
+              <span>Drishti.exe (Vision Demo)</span>
+            </div>
+
+            <div
+              className="start-menu-item"
+              onClick={() => {
+                retroAudio.playMouseDown();
+                onOpenApp('neuroscope');
+                setStartOpen(false);
+              }}
+            >
+              <RetroIcon name="brain" size={24} />
+              <span>NeuroScope3D.exe (3D Demo)</span>
+            </div>
+
+            <div
+              className="start-menu-item"
+              onClick={() => {
+                retroAudio.playMouseDown();
+                onOpenApp('ask');
+                setStartOpen(false);
+              }}
+            >
+              <RetroIcon name="chat" size={24} />
+              <span>Ask Jeevesh (Assistant)</span>
+            </div>
+
+            <div
+              className="start-menu-item"
+              onClick={() => {
+                retroAudio.playMouseDown();
                 onOpenApp('about');
                 setStartOpen(false);
               }}
@@ -206,6 +256,20 @@ export const Taskbar: React.FC<TaskbarProps> = ({
             </div>
 
             <div style={{ height: '1px', background: '#808080', margin: '4px 2px', borderBottom: '1px solid #ffffff' }} />
+
+            {onOpenRecruiterMode && (
+              <div
+                className="start-menu-item"
+                onClick={() => {
+                  retroAudio.playMouseDown();
+                  setStartOpen(false);
+                  onOpenRecruiterMode();
+                }}
+              >
+                <RetroIcon name="document" size={24} />
+                <span>Recruiter Summary (1 page)</span>
+              </div>
+            )}
 
             <div
               className="start-menu-item"

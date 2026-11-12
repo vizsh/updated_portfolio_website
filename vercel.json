@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/((?!assets|models|textures|audio|videos|favicon\\.svg|icons\\.svg|.*\\..*).*)",
+      "source": "/recruiter",
+      "destination": "/recruiter/index.html"
+    },
+    {
+      "source": "/projects/:id",
+      "destination": "/projects/:id/index.html"
+    },
+    {
+      "source": "/((?!api/|assets|models|textures|audio|videos|favicon\\.svg|icons\\.svg|.*\\..*).*)",
       "destination": "/index.html"
     }
   ],
@@ -46,5 +54,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/ask.ts": {
+      "maxDuration": 30
+    }
+  }
 }

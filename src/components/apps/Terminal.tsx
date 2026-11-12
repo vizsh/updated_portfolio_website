@@ -6,6 +6,8 @@ import {
   EDUCATION_DATA
 } from '../../data/portfolioData';
 import { retroAudio } from '../../services/audio';
+import { getRepoStats, isCiPassing, timeAgo, GITHUB_STATS_FETCHED_AT } from '../../lib/githubStats';
+import { askJeevesh } from '../../lib/ask';
 
 interface TerminalLine {
   type: 'input' | 'output' | 'error' | 'success';
@@ -42,13 +44,41 @@ export const Terminal: React.FC = () => {
         return;
       }
 
+      // "ask <question>": the portfolio assistant, answered asynchronously.
+      if (cmd === 'ask' || cmd.startsWith('ask ')) {
+        const question = inputVal.trim().slice(3).trim();
+        if (!question) {
+          newLines.push({ type: 'error', text: 'Usage: ask <question>   e.g.  ask which projects use computer vision?' });
+          setHistory(prev => [...prev, ...newLines]);
+          setInputVal('');
+          return;
+        }
+        newLines.push({ type: 'output', text: 'Thinking...' });
+        setHistory(prev => [...prev, ...newLines]);
+        setInputVal('');
+        void askJeevesh([{ role: 'user', content: question }]).then(result => {
+          const answerLines: TerminalLine[] = [
+            {
+              type: 'success',
+              text: result.mode === 'ai' ? '>>> ASK JEEVESH (Claude, answers only from this portfolio):' : '>>> ASK JEEVESH (offline keyword search):'
+            },
+            ...result.answer.split('\n').map(text => ({ type: 'output' as const, text })),
+            ...(result.notice ? [{ type: 'output' as const, text: result.notice }] : []),
+            { type: 'output', text: '' }
+          ];
+          setHistory(prev => [...prev, ...answerLines]);
+        });
+        return;
+      }
+
       switch (cmd) {
         case 'help':
           newLines.push(
             { type: 'output', text: 'Available DOS commands:' },
+            { type: 'output', text: '  ask <q>      - Ask the portfolio assistant a question' },
             { type: 'output', text: '  whoami       - Display identity, CGPA, and role' },
             { type: 'output', text: '  demo / video - Inspect portfolio & project demonstration video' },
-            { type: 'output', text: '  repos        - List verified premier GitHub repositories' },
+            { type: 'output', text: '  repos        - List GitHub repositories with live commit stats' },
             { type: 'output', text: '  jarvis       - Inspect JARVIS autonomous quantitative hedge fund' },
             { type: 'output', text: '  drishti      - Inspect Drishti AI real-time exam surveillance' },
             { type: 'output', text: '  neuroscope   - Inspect NeuroScope 3D cranial tumor segmentation' },
@@ -77,21 +107,24 @@ export const Terminal: React.FC = () => {
           );
           break;
 
-        case 'repos':
-          newLines.push(
-            { type: 'success', text: '=== VERIFIED FLAGSHIP GITHUB REPOSITORIES (vizsh) ===' },
-            { type: 'output', text: '1. Jarvis_Hedge_Fund: 72 commits | 532 passing tests | Bilingual (EN/HI)' },
-            { type: 'output', text: '   https://github.com/vizsh/Jarvis_Hedge_Fund' },
-            { type: 'output', text: '2. Drishti_AI: 79 commits (highest) | Modular 5-stage pipeline | 92% mAP50' },
-            { type: 'output', text: '   https://github.com/vizsh/Drishti_AI' },
-            { type: 'output', text: '3. NeuroScope 3D: 42 commits | Real MONAI | 17/17 judge tests | 48 pytests' },
-            { type: 'output', text: '   https://github.com/vizsh/DecentralisedIntelligence_NeuroScope3d_Outliers3797_PS02' },
-            { type: 'output', text: '4. Pillai_Hotel360: 56 commits | 100MB | CI badge | 12 decision modules' },
-            { type: 'output', text: '   https://github.com/vizsh/Pillai_Hotel360' },
-            { type: 'output', text: '5. SIH_IBVAP: 35 commits | 106MB | Ministry of Home Affairs / SSB PS' },
-            { type: 'output', text: '   https://github.com/vizsh/SIH_IBVAP' }
-          );
+        case 'repos': {
+          newLines.push({ type: 'success', text: '=== GITHUB REPOSITORIES (vizsh) — LIVE SNAPSHOT ===' });
+          PROJECTS_DATA.forEach((project, i) => {
+            if (!project.repoStats) return;
+            const live = getRepoStats(project.repoStats.repoName);
+            const commits = live?.commits ?? project.repoStats.commits;
+            const lastCommit = live ? ` | last commit ${timeAgo(live.lastCommitAt)}` : '';
+            const ci = isCiPassing(live) ? ' | CI passing' : '';
+            newLines.push(
+              { type: 'output', text: `${i + 1}. ${project.repoStats.repoName.split('/')[1]}: ${commits} commits${lastCommit}${ci}` },
+              { type: 'output', text: `   ${project.githubUrl ?? PERSONAL_INFO.github}` }
+            );
+          });
+          if (GITHUB_STATS_FETCHED_AT) {
+            newLines.push({ type: 'output', text: `(synced from api.github.com ${timeAgo(GITHUB_STATS_FETCHED_AT)})` });
+          }
           break;
+        }
 
         case 'jarvis':
           newLines.push(

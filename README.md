@@ -45,6 +45,23 @@ An interactive 3D retro desktop portfolio bridging a spatial 3D study workstatio
 - **Taskbar & Start Menu**: Active window pills, start menu cascade, system tray with real-time clock, volume toggle, and a `"🛋️ Desk"` quick return button.
 - **Global Escape Key (`Esc`)**: Instantly steps back from Screen ➔ Desk ➔ Room.
 
+### 5. 🔎 Proof, Not Just Claims
+- **Recruiter Mode** (`/recruiter/`, or the HUD's ⚡ button): a fast, printable one-page summary. It loads without the 3D engine.
+- **Shareable deep links**: `/projects/<id>/` opens the OS on that case study, and `/apps/<slug>` (`jarvis`, `drishti`, `neuroscope`, `ask`, `terminal`, …) opens an app. Each project link gets its own title and description in LinkedIn/WhatsApp/Slack previews (generated at build time).
+- **Live GitHub stats**: commit counts, last-commit age and CI status (shown only when the latest real run passed) are fetched from the GitHub API at build time (`scripts/fetch-github-stats.mjs`).
+- **Case studies**: Problem → Constraints → Architecture → Decisions → Results → Honest limits → Next, written from each repository's own README/docs and linked to them (`src/data/caseStudies.ts`).
+
+### 6. ▶️ In-Browser Project Demos
+- **JARVIS.exe**: deterministic finance calculators (DCF with sensitivity table, moneylender check, fee drag). Every number shows its working (`src/lib/finance.ts`).
+- **Drishti.exe**: webcam/video behaviour monitor with MediaPipe pose + object detection, face pixelation, per-person z-score baselines and persistence-gated, explained alerts. Frames never leave the browser.
+- **NeuroScope3D.exe**: a synthetic brain-tumour phantom with nested WT/TC/ET regions, cutaway plane, linked slice view and volumes that show their formula. Not patient data.
+- **Ask Jeevesh**: a portfolio assistant (window or `ask <question>` in MS-DOS Prompt) that answers only from the site's data, with citations. It uses Claude via `api/ask.ts` when an API key is configured; otherwise it falls back to offline keyword search.
+  - Site commands: `open jarvis`, `show the Drishti case study`, `open the IBVAP repo`, `open resume`, `open recruiter summary`, `help`.
+  - Follow-up questions keep their context ("what are its limits?"), even offline.
+  - Buttons under each answer: try the demo, open the repo, email or copy the contact address, or email an unanswered question.
+  - Knows each repo's activity (commit count, last commit date) from the build-time GitHub snapshot.
+  - The conversation survives minimizing or closing the window for the browser session. "New chat" clears it, and ↑ recalls the last question.
+
 ---
 
 ## 🛠️ Tech Stack & Architecture
@@ -79,9 +96,20 @@ npm run dev
 
 ### Production Build
 ```bash
-npm run build
+npm run build     # also refreshes GitHub stats first (prebuild)
 npm run preview
 ```
+
+### Optional configuration
+| Variable | Where | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Vercel env vars, or `.env.local` for local dev | Enables AI answers in Ask Jeevesh. Without it, the chat uses offline search. |
+| `ASK_JEEVESH_MODEL` | same | Model override for the chat (default `claude-opus-5-5`). |
+| `GITHUB_TOKEN` | Vercel env vars / shell | Raises the GitHub API rate limit for the build-time stats fetch (public read-only access is enough). |
+| `SITE_URL` | Vercel env vars / shell | Canonical origin for link previews (defaults to Vercel's production domain). |
+| `SKIP_GITHUB_STATS=1` | shell | Build without refreshing GitHub stats. |
+
+Other scripts: `npm run stats` refreshes `src/data/githubStats.json` on demand. `api/_knowledge.ts` is regenerated from the site's data on every dev start and build; don't edit it by hand.
 
 ---
 

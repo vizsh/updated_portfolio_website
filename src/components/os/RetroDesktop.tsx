@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import type { AppId, WindowState, Position, Size } from '../../types/os';
 import { DesktopGrid } from './DesktopGrid';
 import { Taskbar } from './Taskbar';
@@ -14,8 +14,32 @@ import { ResumeViewer } from '../apps/ResumeViewer';
 import { MediaPlayer } from '../apps/MediaPlayer';
 import { RecycleBin } from '../apps/RecycleBin';
 import { VideoPlayer } from '../apps/VideoPlayer';
+import { JarvisApp } from '../apps/JarvisApp';
+import { AskJeeveshApp } from '../apps/AskJeeveshApp';
+
+// Heavy demos (ML runtimes, extra WebGL contexts) load only when their window opens.
+const DrishtiApp = lazy(() => import('../apps/DrishtiApp').then(m => ({ default: m.DrishtiApp })));
+const NeuroScopeApp = lazy(() => import('../apps/NeuroScopeApp').then(m => ({ default: m.NeuroScopeApp })));
+
+const AppLoading: React.FC<{ label: string }> = ({ label }) => (
+  <div
+    style={{
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#000000',
+      color: '#39ff14',
+      fontFamily: 'var(--font-dos), monospace',
+      fontSize: '16px'
+    }}
+  >
+    LOADING {label}...
+  </div>
+);
 import { ShutdownDialog, SafeToTurnOffScreen } from './ShutdownDialog';
 import { retroAudio } from '../../services/audio';
+import type { InitialRoute } from '../../lib/route';
 
 const INITIAL_WINDOWS: Record<AppId, WindowState> = {
   showcase: {
@@ -149,23 +173,120 @@ const INITIAL_WINDOWS: Record<AppId, WindowState> = {
     position: { x: 100, y: 40 },
     size: { width: 640, height: 490 },
     minSize: { width: 360, height: 320 }
+  },
+  jarvis: {
+    id: 'jarvis',
+    title: 'JARVIS.exe - Deterministic Finance',
+    icon: 'jarvis',
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 7,
+    position: { x: 110, y: 30 },
+    size: { width: 660, height: 540 },
+    minSize: { width: 340, height: 320 }
+  },
+  drishti: {
+    id: 'drishti',
+    title: 'Drishti.exe - Privacy-First Behaviour Monitor',
+    icon: 'eye',
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 7,
+    position: { x: 70, y: 20 },
+    size: { width: 800, height: 580 },
+    minSize: { width: 420, height: 380 }
+  },
+  neuroscope: {
+    id: 'neuroscope',
+    title: 'NeuroScope3D.exe - Segmentation Viewer (Synthetic Phantom)',
+    icon: 'brain',
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 7,
+    position: { x: 90, y: 24 },
+    size: { width: 820, height: 600 },
+    minSize: { width: 440, height: 400 }
+  },
+  ask: {
+    id: 'ask',
+    title: 'Ask Jeevesh - Portfolio Assistant',
+    icon: 'chat',
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 7,
+    position: { x: 200, y: 36 },
+    size: { width: 440, height: 560 },
+    minSize: { width: 300, height: 360 }
   }
+};
+
+/** Shrink and shift a window so it fits inside the current viewport (above the taskbar). */
+const fitBounds = (win: WindowState): Pick<WindowState, 'position' | 'size'> => {
+  if (typeof window === 'undefined') return { position: win.position, size: win.size };
+  const width = Math.min(win.size.width, window.innerWidth - 16);
+  const height = Math.min(win.size.height, window.innerHeight - 56);
+  return {
+    size: { width, height },
+    position: {
+      x: Math.max(0, Math.min(win.position.x, window.innerWidth - width - 8)),
+      y: Math.max(0, Math.min(win.position.y, window.innerHeight - height - 48))
+    }
+  };
+};
+
+/** Window the deep link should bring to the front, if any. */
+const routeTargetWindow = (route: InitialRoute): AppId | null => {
+  if (route.kind === 'project') return 'showcase';
+  if (route.kind === 'app') return route.appId;
+  return null;
+};
+
+/** Apply a deep link to the boot-time window layout. */
+const windowsForRoute = (route: InitialRoute): Record<AppId, WindowState> => {
+  const target = routeTargetWindow(route);
+  if (!target) return INITIAL_WINDOWS;
+  return {
+    ...INITIAL_WINDOWS,
+    [target]: {
+      ...INITIAL_WINDOWS[target],
+      ...fitBounds(INITIAL_WINDOWS[target]),
+      isOpen: true,
+      isMinimized: false,
+      zIndex: 11
+    }
+  };
 };
 
 interface RetroDesktopProps {
   onToggle3DMode: () => void;
+  onOpenRecruiterMode?: () => void;
+  initialRoute?: InitialRoute;
   crtIntensity?: 'off' | 'subtle' | 'authentic' | 'heavy';
   onChangeCrtIntensity?: (intensity: 'off' | 'subtle' | 'authentic' | 'heavy') => void;
 }
 
 export const RetroDesktop: React.FC<RetroDesktopProps> = ({
   onToggle3DMode,
+  onOpenRecruiterMode,
+  initialRoute = { kind: 'home' },
   crtIntensity = 'authentic',
   onChangeCrtIntensity
 }) => {
-  const [windows, setWindows] = useState<Record<AppId, WindowState>>(INITIAL_WINDOWS);
-  const [activeWindowId, setActiveWindowId] = useState<AppId | null>('showcase');
-  const [highestZ, setHighestZ] = useState(10);
+  const [windows, setWindows] = useState<Record<AppId, WindowState>>(() => windowsForRoute(initialRoute));
+  const [activeWindowId, setActiveWindowId] = useState<AppId | null>(
+    () => routeTargetWindow(initialRoute) ?? 'showcase'
+  );
+  // Stacking counter in a ref: several raises in one event (focus, then open) each get a fresh z.
+  const zCounter = useRef(routeTargetWindow(initialRoute) ? 11 : 10);
+  const nextZ = () => ++zCounter.current;
+  const initialProjectId = initialRoute.kind === 'project' ? initialRoute.projectId : undefined;
+  // Opening a case study from another app (e.g. a chat citation) remounts the Showcase on that project.
+  const [showcaseTarget, setShowcaseTarget] = useState<{ projectId: string; nonce: number } | null>(null);
+  const showcaseProjectId = showcaseTarget?.projectId ?? initialProjectId;
   const [showShutdownDialog, setShowShutdownDialog] = useState(false);
   const [isShutDown, setIsShutDown] = useState(false);
 
@@ -215,20 +336,18 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
   // Bring window to top focus
   const focusWindow = (id: AppId) => {
     setActiveWindowId(id);
-    setHighestZ(prevZ => {
-      const newZ = prevZ + 1;
-      setWindows(prev => ({
-        ...prev,
-        [id]: { ...prev[id], zIndex: newZ, isMinimized: false }
-      }));
-      return newZ;
-    });
+    const z = nextZ();
+    setWindows(prev => ({
+      ...prev,
+      [id]: { ...prev[id], zIndex: z, isMinimized: false }
+    }));
   };
 
   // Open an app with smart mobile snap
   const openApp = (id: AppId) => {
     retroAudio.playMouseDown();
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const z = nextZ();
 
     setWindows(prev => ({
       ...prev,
@@ -236,17 +355,24 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         ...prev[id],
         isOpen: true,
         isMinimized: false,
-        zIndex: highestZ + 1,
+        zIndex: z,
         ...(isMobile
           ? {
               position: { x: 4, y: 38 },
               size: { width: window.innerWidth - 8, height: window.innerHeight - 84 }
             }
-          : {})
+          : prev[id].isOpen
+            ? {}
+            : fitBounds(prev[id]))
       }
     }));
-    setHighestZ(h => h + 1);
     setActiveWindowId(id);
+  };
+
+  // Open the Showcase straight onto one project's case study
+  const openProject = (projectId: string) => {
+    setShowcaseTarget({ projectId, nonce: Date.now() });
+    openApp('showcase');
   };
 
   // Close a window
@@ -381,7 +507,12 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         onMaximizeToggle={() => toggleMaximize('showcase')}
         onUpdateBounds={(pos, size) => updateWindowBounds('showcase', pos, size)}
       >
-        <ShowcaseExplorer onOpenApp={openApp} />
+        <ShowcaseExplorer
+          key={showcaseTarget?.nonce ?? 'boot'}
+          onOpenApp={openApp}
+          initialTab={showcaseProjectId ? 'projects' : 'overview'}
+          initialProjectId={showcaseProjectId}
+        />
       </RetroWindow>
 
       {/* 2. Projects Explorer (Folder View) */}
@@ -520,6 +651,62 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         <VideoPlayer />
       </RetroWindow>
 
+      {/* 12. JARVIS.exe — deterministic finance calculators */}
+      <RetroWindow
+        window={windows.jarvis}
+        isActive={activeWindowId === 'jarvis'}
+        onFocus={() => focusWindow('jarvis')}
+        onClose={() => closeWindow('jarvis')}
+        onMinimize={() => minimizeWindow('jarvis')}
+        onMaximizeToggle={() => toggleMaximize('jarvis')}
+        onUpdateBounds={(pos, size) => updateWindowBounds('jarvis', pos, size)}
+      >
+        <JarvisApp />
+      </RetroWindow>
+
+      {/* 13. Drishti.exe — in-browser pose + object pipeline */}
+      <RetroWindow
+        window={windows.drishti}
+        isActive={activeWindowId === 'drishti'}
+        onFocus={() => focusWindow('drishti')}
+        onClose={() => closeWindow('drishti')}
+        onMinimize={() => minimizeWindow('drishti')}
+        onMaximizeToggle={() => toggleMaximize('drishti')}
+        onUpdateBounds={(pos, size) => updateWindowBounds('drishti', pos, size)}
+      >
+        <Suspense fallback={<AppLoading label="DRISHTI.EXE" />}>
+          <DrishtiApp />
+        </Suspense>
+      </RetroWindow>
+
+      {/* 14. NeuroScope3D.exe — synthetic segmentation viewer */}
+      <RetroWindow
+        window={windows.neuroscope}
+        isActive={activeWindowId === 'neuroscope'}
+        onFocus={() => focusWindow('neuroscope')}
+        onClose={() => closeWindow('neuroscope')}
+        onMinimize={() => minimizeWindow('neuroscope')}
+        onMaximizeToggle={() => toggleMaximize('neuroscope')}
+        onUpdateBounds={(pos, size) => updateWindowBounds('neuroscope', pos, size)}
+      >
+        <Suspense fallback={<AppLoading label="NEUROSCOPE3D.EXE" />}>
+          <NeuroScopeApp />
+        </Suspense>
+      </RetroWindow>
+
+      {/* 15. Ask Jeevesh — portfolio assistant */}
+      <RetroWindow
+        window={windows.ask}
+        isActive={activeWindowId === 'ask'}
+        onFocus={() => focusWindow('ask')}
+        onClose={() => closeWindow('ask')}
+        onMinimize={() => minimizeWindow('ask')}
+        onMaximizeToggle={() => toggleMaximize('ask')}
+        onUpdateBounds={(pos, size) => updateWindowBounds('ask', pos, size)}
+      >
+        <AskJeeveshApp onOpenProject={openProject} onOpenApp={openApp} onOpenRecruiterMode={onOpenRecruiterMode} />
+      </RetroWindow>
+
       {/* Right-Click Desktop Context Menu */}
       {contextMenu.visible && (
         <DesktopContextMenu
@@ -539,6 +726,7 @@ export const RetroDesktop: React.FC<RetroDesktopProps> = ({
         onOpenApp={openApp}
         onShutdown={() => setShowShutdownDialog(true)}
         onToggle3DMode={onToggle3DMode}
+        onOpenRecruiterMode={onOpenRecruiterMode}
       />
 
       {/* Shutdown Confirmation Dialog */}

@@ -9,6 +9,7 @@ interface TopHUDProps {
   isNightMode?: boolean;
   onToggleLamp?: () => void;
   hoveredItem?: string | null;
+  onOpenRecruiterMode?: () => void;
 }
 
 export const TopHUD: React.FC<TopHUDProps> = ({
@@ -16,7 +17,8 @@ export const TopHUD: React.FC<TopHUDProps> = ({
   onChangeView,
   isNightMode = false,
   onToggleLamp = () => {},
-  hoveredItem = null
+  hoveredItem = null,
+  onOpenRecruiterMode
 }) => {
   const [timeStr, setTimeStr] = useState('');
   const [isMuted, setIsMuted] = useState(retroAudio.isMuted());
@@ -194,6 +196,32 @@ export const TopHUD: React.FC<TopHUDProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Recruiter fast path: skips the 3D experience entirely */}
+        {onOpenRecruiterMode && (
+          <button
+            id="hud-btn-recruiter"
+            onClick={() => {
+              retroAudio.playMouseDown();
+              onOpenRecruiterMode();
+            }}
+            style={{
+              backgroundColor: '#000080',
+              color: '#ffff55',
+              padding: '2px 8px',
+              border: '1px solid #5599ff',
+              alignSelf: 'flex-start',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              letterSpacing: 'inherit'
+            }}
+            title="Skip the 3D tour: one-page summary of projects, skills and contact"
+          >
+            ⚡ Recruiter view (30-sec summary)
+          </button>
+        )}
       </div>
 
       {/* Bottom Floating Dynamic Hint / Object Tooltip */}

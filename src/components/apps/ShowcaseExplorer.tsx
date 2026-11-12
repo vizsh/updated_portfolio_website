@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   PERSONAL_INFO,
   PROJECTS_DATA,
@@ -9,21 +9,49 @@ import {
 } from '../../data/portfolioData';
 import { RetroIcon } from '../common/RetroIcon';
 import { retroAudio } from '../../services/audio';
+import { projectPath, replaceUrl, copyShareLink } from '../../lib/route';
+import { LiveRepoBadges, GithubSyncNote } from '../common/LiveRepoStats';
+import { getRepoStats, liveRepoSummaryLines } from '../../lib/githubStats';
+import { getCaseStudy, demoWindowFor } from '../../data/caseStudies';
+import { CaseStudyView } from './CaseStudyView';
 
 type Tab = 'overview' | 'video' | 'projects' | 'experience' | 'hackathons' | 'education' | 'skills' | 'contact';
 
 interface ShowcaseExplorerProps {
   initialTab?: Tab;
+  /** Open straight into this project's case study (deep link). */
+  initialProjectId?: string;
   onOpenApp?: (id: any) => void;
 }
 
 export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
   initialTab = 'overview',
+  initialProjectId,
   onOpenApp
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [deepDiveProject, setDeepDiveProject] = useState<any | null>(null);
+  const [deepDiveProject, setDeepDiveProject] = useState<any | null>(
+    () => (initialProjectId ? PROJECTS_DATA.find(p => p.id === initialProjectId) ?? null : null)
+  );
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Keep the address bar shareable: /projects/<id> while a case study is open.
+  useEffect(() => {
+    if (!deepDiveProject) return;
+    const path = projectPath(deepDiveProject.id);
+    replaceUrl(path);
+    return () => {
+      if (window.location.pathname === path) replaceUrl('/');
+    };
+  }, [deepDiveProject]);
+
+  const handleCopyProjectLink = async (projectId: string) => {
+    const ok = await copyShareLink(projectPath(projectId));
+    retroAudio.playBeep(ok ? 880 : 220, 0.08);
+    setLinkCopied(ok);
+    if (ok) setTimeout(() => setLinkCopied(false), 2500);
+  };
 
   // Contact form state
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
@@ -542,16 +570,26 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
               {/* Deep Dive Modal View if selected */}
               {deepDiveProject ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <button
-                    className="win-button"
-                    onClick={() => {
-                      retroAudio.playMouseDown();
-                      setDeepDiveProject(null);
-                    }}
-                    style={{ alignSelf: 'flex-start', padding: '3px 10px', fontSize: '11px' }}
-                  >
-                    &larr; Back to Projects Explorer
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      className="win-button"
+                      onClick={() => {
+                        retroAudio.playMouseDown();
+                        setDeepDiveProject(null);
+                      }}
+                      style={{ padding: '3px 10px', fontSize: '11px' }}
+                    >
+                      &larr; Back to Projects Explorer
+                    </button>
+                    <button
+                      className="win-button"
+                      onClick={() => handleCopyProjectLink(deepDiveProject.id)}
+                      style={{ padding: '3px 10px', fontSize: '11px' }}
+                      title="Copy a link that opens this case study directly"
+                    >
+                      {linkCopied ? '✔ Link copied!' : '🔗 Copy share link'}
+                    </button>
+                  </div>
 
                   <div className="win-outset" style={{ padding: '16px', background: '#fafafa' }}>
                     <div style={{ borderBottom: '2px solid #000080', paddingBottom: '6px', marginBottom: '12px' }}>
@@ -584,9 +622,12 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
                             REPO: {deepDiveProject.repoStats.repoName}
                           </span>
                           <span style={{ color: '#ffff55' }}>
-                            COMMITS: {deepDiveProject.repoStats.commits}
+                            COMMITS: {getRepoStats(deepDiveProject.repoStats.repoName)?.commits ?? deepDiveProject.repoStats.commits}
                           </span>
                         </div>
+                        {liveRepoSummaryLines(deepDiveProject.repoStats.repoName).map(line => (
+                          <div key={line} style={{ color: '#85d7ff' }}>{line}</div>
+                        ))}
                         <div>TEST SUITE: {deepDiveProject.repoStats.tests}</div>
                         <div>STATUS: {deepDiveProject.repoStats.verifiedBadge}</div>
                         <div style={{ color: '#aaaaaa', fontSize: '10px' }}>
@@ -595,24 +636,34 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
                       </div>
                     )}
 
-                    <h4 style={{ fontSize: '13px', color: '#000080', marginBottom: '4px' }}>System Overview</h4>
-                    <p style={{ fontSize: '12px', color: '#333', lineHeight: '1.5', marginBottom: '12px' }}>
-                      {deepDiveProject.deepDive.overview}
-                    </p>
+                    {getCaseStudy(deepDiveProject.id) ? (
+                      <CaseStudyView
+                        study={getCaseStudy(deepDiveProject.id)!}
+                        demoWindow={demoWindowFor(deepDiveProject.id)}
+                        onOpenDemo={onOpenApp ? appId => onOpenApp(appId) : undefined}
+                      />
+                    ) : deepDiveProject.deepDive ? (
+                      <>
+                      <h4 style={{ fontSize: '13px', color: '#000080', marginBottom: '4px' }}>System Overview</h4>
+                      <p style={{ fontSize: '12px', color: '#333', lineHeight: '1.5', marginBottom: '12px' }}>
+                        {deepDiveProject.deepDive.overview}
+                      </p>
 
-                    <h4 style={{ fontSize: '13px', color: '#000080', marginBottom: '4px' }}>Modular Architecture</h4>
-                    <ul style={{ margin: '0 0 12px 18px', fontSize: '11px', color: '#444', lineHeight: '1.6' }}>
-                      {deepDiveProject.deepDive.architecture.map((arch: string, i: number) => (
-                        <li key={i}>{arch}</li>
-                      ))}
-                    </ul>
+                      <h4 style={{ fontSize: '13px', color: '#000080', marginBottom: '4px' }}>Modular Architecture</h4>
+                      <ul style={{ margin: '0 0 12px 18px', fontSize: '11px', color: '#444', lineHeight: '1.6' }}>
+                        {deepDiveProject.deepDive.architecture.map((arch: string, i: number) => (
+                          <li key={i}>{arch}</li>
+                        ))}
+                      </ul>
 
-                    <h4 style={{ fontSize: '13px', color: '#000080', marginBottom: '4px' }}>Benchmark Verification</h4>
-                    <div className="win-sunken" style={{ padding: '8px', background: '#f0f0f0', fontSize: '11px', marginBottom: '12px', color: '#222' }}>
-                      <strong>Audit Benchmark:</strong> {deepDiveProject.deepDive.benchmark}
-                    </div>
+                      <h4 style={{ fontSize: '13px', color: '#000080', marginBottom: '4px' }}>Benchmark Verification</h4>
+                      <div className="win-sunken" style={{ padding: '8px', background: '#f0f0f0', fontSize: '11px', marginBottom: '12px', color: '#222' }}>
+                        <strong>Audit Benchmark:</strong> {deepDiveProject.deepDive.benchmark}
+                      </div>
+                      </>
+                    ) : null}
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
                       <a
                         href={deepDiveProject.githubUrl}
                         target="_blank"
@@ -627,6 +678,7 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
                 </div>
               ) : (
                 <div>
+                  <GithubSyncNote style={{ display: 'block', marginBottom: '8px' }} />
                   <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
                     {categories.map(cat => (
                       <button
@@ -714,19 +766,10 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
                             </div>
 
                             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                              <span
-                                className="win-sunken"
-                                style={{
-                                  background: '#071018',
-                                  color: '#39ff14',
-                                  fontSize: '10px',
-                                  padding: '2px 7px',
-                                  fontFamily: 'monospace',
-                                  fontWeight: 'bold'
-                                }}
-                              >
-                                Commits: {proj.repoStats.commits}
-                              </span>
+                              <LiveRepoBadges
+                                repoName={proj.repoStats.repoName}
+                                fallbackCommits={proj.repoStats.commits}
+                              />
 
                               {proj.repoStats.tests && (
                                 <span
@@ -788,7 +831,7 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
 
                         {/* Action Buttons */}
                         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                          {proj.deepDive && (
+                          {(getCaseStudy(proj.id) || proj.deepDive) && (
                             <button
                               className="win-button"
                               onClick={() => {
@@ -797,7 +840,7 @@ export const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = ({
                               }}
                               style={{ fontSize: '11px', padding: '3px 10px' }}
                             >
-                              🔍 View Architecture & Deep Dive
+                              🔍 Read Case Study
                             </button>
                           )}
                           <a

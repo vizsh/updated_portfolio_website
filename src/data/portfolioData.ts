@@ -200,7 +200,7 @@ export const PROJECTS_DATA: (ProjectItem & {
       tests: '17 / 17 judge tests & 48 pytest suites',
       verifiedBadge: '17/17 Judge Tests Passed',
       highlights: 'Real MONAI Model • Measured Dice/HD95 • Reproducible Run Discipline',
-      repoName: 'vizsh/DecentralisedIntelligence_NeuroScope3d'
+      repoName: 'vizsh/DecentralisedIntelligence_NeuroScope3d_Outliers3797_PS02'
     },
     deepDive: {
       overview: '3D surgical visualization often relies on heavy workstation installs or mocked browser animations. NeuroScope 3D delivers real GPU raymarching directly in the browser, powered by validated MONAI segmentation models.',
